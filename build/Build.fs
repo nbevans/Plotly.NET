@@ -20,8 +20,8 @@ open BasicTasks
 
 let sourceFiles =
     !! "src/Plotly.NET/**/*.fs"
-    ++ "src/Plotly.NET.ImageExport/**/*.fs"
-    ++ "src/Plotly.NET.Interactive/**/*.fs"
+    //++ "src/Plotly.NET.ImageExport/**/*.fs"
+    //++ "src/Plotly.NET.Interactive/**/*.fs"
     ++ "build/*.fs"
     -- "**/obj/**/*.*"
     -- "**/bin/**/*.*"
@@ -64,7 +64,6 @@ let _releaseNoDocs =
         [
             clean
             build
-            runTests
             pack
             createTag
             publishNuget

@@ -61,10 +61,10 @@ let publishNuget =
 
         if promptYesNo "OK?" then
             let source =
-                "https://api.nuget.org/v3/index.json"
+                "https://pkgs.dev.azure.com/housinginsight/_packaging/Legacy_Packages/nuget/v3/index.json"
 
             let apikey =
-                Environment.environVar "NUGET_KEY"
+                "az" // Environment.environVar "NUGET_KEY"
 
             for artifact in targets do
                 let result =
@@ -102,10 +102,10 @@ let publishNugetPrerelease =
 
         if promptYesNo "OK?" then
             let source =
-                "https://api.nuget.org/v3/index.json"
+                "https://pkgs.dev.azure.com/housinginsight/_packaging/Legacy_Packages/nuget/v3/index.json"
 
             let apikey =
-                Environment.environVar "NUGET_KEY"
+                "az" // Environment.environVar "NUGET_KEY"
 
             for artifact in targets do
                 let result =

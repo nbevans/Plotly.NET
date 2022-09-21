@@ -71,8 +71,8 @@ let CSharpTestProject = ProjectInfo.create("Plotly.NET.CSharp.Tests", "tests/Plo
 let testProjects =
     [
         CoreTestProject 
-        ImageExportTestProject
-        CSharpTestProject
+        //ImageExportTestProject
+        //CSharpTestProject
     ]
 
 let CoreProject = ProjectInfo.create("Plotly.NET", "src/Plotly.NET/Plotly.NET.fsproj", "src/Plotly.NET/RELEASE_NOTES.md")
@@ -83,9 +83,9 @@ let CSharpProject = ProjectInfo.create("Plotly.NET.CSharp", "src/Plotly.NET.CSha
 /// contains project info about all projects
 let projects = [
    CoreProject
-   InteractiveProject
-   ImageExportProject
-   CSharpProject
+   //InteractiveProject
+   //ImageExportProject
+   //CSharpProject
 ]
 
 /// docs are always targeting the version of the core project
