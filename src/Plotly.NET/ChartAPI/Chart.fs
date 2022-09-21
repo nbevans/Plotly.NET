@@ -35,7 +35,7 @@ type Chart =
                 if path.EndsWith(".html") then
                     path
                 else
-                    $"{path}.html"
+                    path + ".html"
 
             File.WriteAllText(file, html)
             if show then file |> openOsSpecificFile
@@ -1043,7 +1043,7 @@ type Chart =
 
                         layout |> Layout.updateSceneById (id, updatedScene))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a xaxis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a xaxis")
 
     /// <summary>
     /// Sets the given x axis on the input chart's layout, optionally passing a target axis id.
@@ -1644,7 +1644,7 @@ type Chart =
 
                         layout |> Layout.updatePolarById (id, updatedPolar))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting an angular axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting an angular axis")
 
     /// <summary>
     /// Sets the AngularAxis on the polar object with the given id on the input chart's layout.
@@ -1703,7 +1703,7 @@ type Chart =
 
                         layout |> Layout.updatePolarById (id, updatedPolar))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting an radial axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting an radial axis")
 
     /// <summary>
     /// Sets the RadialAxis on the polar object with the given id on the input chart's layout.
@@ -1819,7 +1819,7 @@ type Chart =
 
                         layout |> Layout.updateSmithById (id, updatedSmith))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting an imaginary Axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting an imaginary Axis")
 
     /// <summary>
     /// Sets the ImaginaryAxis on the smith object with the given id on the input chart's layout.
@@ -1877,7 +1877,7 @@ type Chart =
 
                         layout |> Layout.updateSmithById (id, updatedSmith))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting an real axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting an real axis")
 
     /// <summary>
     /// Sets the RealAxis on the smith object with the given id on the input chart's layout.
@@ -2260,7 +2260,7 @@ type Chart =
 
                         layout |> Layout.updateTernaryById (id, updatedTernary))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting an a axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting an a axis")
 
     /// <summary>
     /// Sets the a axis on the ternary object with the given id on the input chart's layout.
@@ -2320,7 +2320,7 @@ type Chart =
 
                         layout |> Layout.updateTernaryById (id, updatedTernary))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a b axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a b axis")
 
     /// <summary>
     /// Sets the b axis on the ternary object with the given id on the input chart's layout.
@@ -2380,7 +2380,7 @@ type Chart =
 
                         layout |> Layout.updateTernaryById (id, updatedTernary))
 
-            | _ -> failwith $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a c axis"
+            | _ -> failwith (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a c axis")
 
     /// <summary>
     /// Sets the c axis on the ternary object with the given id on the input chart's layout.
@@ -2858,7 +2858,7 @@ type Chart =
                 match TraceID.ofTraces (gChart |> GenericChart.getTraces) with
                 | TraceID.Multi ->
                     failwith
-                        $"the trace for ({rowIndex},{colIndex}) contains multiple different subplot types. this is not supported."
+                        (sprintf "the trace for (%i,%i) contains multiple different subplot types. this is not supported." rowIndex colIndex)
                 | TraceID.Cartesian2D
                 | TraceID.Carpet ->
 

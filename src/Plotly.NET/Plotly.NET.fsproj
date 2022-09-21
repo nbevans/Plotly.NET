@@ -4,7 +4,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>Plotly.NET</RootNamespace>
-    <AssemblyName>Plotly.NET</AssemblyName>
+    <AssemblyName>Plotly.NET.FSC472</AssemblyName>
     <Name>Plotly.NET</Name>
     <OutputType>Library</OutputType>
     <!-- Optional: Declare that the Repository URL can be published to NuSpec -->
@@ -151,10 +151,13 @@
     <None Include="Playground.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DynamicObj.FSC472" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="DynamicObj" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Layout\ObjectAbstractions\Carpet\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.2" />
   </ItemGroup>
 </Project>

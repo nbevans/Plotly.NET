@@ -30,7 +30,7 @@ type TraceID =
         | :? TraceCarpet -> TraceID.Carpet
         | :? TraceDomain -> TraceID.Domain
         | :? TraceSmith -> TraceID.Smith
-        | unknownTraceType -> failwith $"cannot get trace id for type {unknownTraceType.GetType()}"
+        | unknownTraceType -> failwith ("cannot get trace id for type " + unknownTraceType.GetType().ToString())
 
     static member ofTraces(t: seq<Trace>) : TraceID =
         let traceIds =

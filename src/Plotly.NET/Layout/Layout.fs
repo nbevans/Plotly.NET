@@ -475,7 +475,7 @@ type Layout() =
                 layout
             | _ ->
                 failwith
-                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a linear axis on layout")
+                    (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a linear axis on layout"))
 
     /// <summary>
     /// Returns the linear axis object of the layout with the given id.
@@ -502,7 +502,7 @@ type Layout() =
 
             | _ ->
                 failwith
-                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a linear axis on layout")
+                    (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a linear axis on layout"))
 
     /// <summary>
     /// Returns Some(Scene) if there is a scene object set on the layout with the given id, and None otherwise.
