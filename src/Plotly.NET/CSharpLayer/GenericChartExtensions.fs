@@ -4,9 +4,9 @@ open Plotly.NET.LayoutObjects
 open Plotly.NET.TraceObjects
 open System
 open System.IO
+open Giraffe.ViewEngine
 
 open DynamicObj
-open GenericChart
 open System.Runtime.InteropServices
 open System.Runtime.CompilerServices
 
@@ -461,7 +461,6 @@ module GenericChartExtensions =
             (
                 [<Optional; DefaultParameterValue(null)>] ?Title: Title,
                 [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
-                [<Optional; DefaultParameterValue(null)>] ?Legend: Legend,
                 [<Optional; DefaultParameterValue(null)>] ?Margin: Margin,
                 [<Optional; DefaultParameterValue(null)>] ?AutoSize: bool,
                 [<Optional; DefaultParameterValue(null)>] ?Width: int,
@@ -492,7 +491,7 @@ module GenericChartExtensions =
                 [<Optional; DefaultParameterValue(null)>] ?Computed: string,
                 [<Optional; DefaultParameterValue(null)>] ?Grid: LayoutGrid,
                 [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar,
-                [<Optional; DefaultParameterValue(null)>] ?NewShape: Shape,
+                [<Optional; DefaultParameterValue(null)>] ?NewShape: NewShape,
                 [<Optional; DefaultParameterValue(null)>] ?ActiveShape: ActiveShape,
                 [<Optional; DefaultParameterValue(null)>] ?HideSources: bool,
                 [<Optional; DefaultParameterValue(null)>] ?BarGap: float,
@@ -532,7 +531,6 @@ module GenericChartExtensions =
             |> Chart.withLayoutStyle (
                 ?Title = Title,
                 ?ShowLegend = ShowLegend,
-                ?Legend = Legend,
                 ?Margin = Margin,
                 ?AutoSize = AutoSize,
                 ?Width = Width,
@@ -611,11 +609,8 @@ module GenericChartExtensions =
 
         // Set the LayoutGrid options of a Chart
         [<CompiledName("WithLegend")>]
-        member this.WithLegend(legend: Legend) =
-            let layout =
-                GenericChart.getLayout this |> Layout.setLegend legend
-
-            GenericChart.setLayout layout this
+        member this.WithLegend(legend: Legend, [<Optional; DefaultParameterValue(null)>] ?Id: int) =
+            this |> Chart.withLegend (legend, ?Id = Id)
 
         /// Sets a map for the given chart (will only work with traces supporting geo, e.g. choropleth, scattergeo)
         [<CompiledName("WithMap")>]
@@ -644,7 +639,7 @@ module GenericChartExtensions =
         ///
         /// Center          : Sets the (lon,lat) coordinates of the map's center. By default, the map's longitude center lies at the middle of the longitude range for scoped projection and above `projection.rotation.lon` otherwise. For all projection types, the map's latitude center lies at the middle of the latitude range by default.
         ///
-        /// Visible         : Wether or not the base layers are visible
+        /// Visible         : Whether or not the base layers are visible
         ///
         /// Domain          : The domain of this geo subplot
         ///
@@ -791,9 +786,10 @@ module GenericChartExtensions =
         [<Extension>]
         member this.WithLayoutGridStyle
             (
-                [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId) [] [],
-                [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId [],
-                [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId [],
+                [<Optional; DefaultParameterValue(null)>] ?SubPlots:
+                    (StyleParam.LinearAxisId * StyleParam.LinearAxisId)[][],
+                [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId[],
+                [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId[],
                 [<Optional; DefaultParameterValue(null)>] ?Rows: int,
                 [<Optional; DefaultParameterValue(null)>] ?Columns: int,
                 [<Optional; DefaultParameterValue(null)>] ?RowOrder: StyleParam.LayoutGridRowOrder,
@@ -941,28 +937,32 @@ module GenericChartExtensions =
         /// Show chart in browser
         [<CompiledName("WithDescription")>]
         [<Extension>]
-        member this.WithDescription(description: ChartDescription) =
+        member this.WithDescription(description: XmlNode list) =
             this |> Chart.withDescription description
 
         /// Adds the given additional script tags on the chart's DisplayOptions. They will be included in the document's <head>
         [<CompiledName("WithAdditionalHeadTags")>]
         [<Extension>]
-        member this.WithAdditionalHeadTags(additionalHeadTags: seq<string>) =
+        member this.WithAdditionalHeadTags(additionalHeadTags: XmlNode list) =
             this |> Chart.withAdditionalHeadTags additionalHeadTags
 
         /// Sets the given additional script tags on the chart's DisplayOptions. They will be included in the document's <head>
         [<CompiledName("WithHeadTags")>]
         [<Extension>]
-        member this.WithHeadTags(headTags: seq<string>) = this |> Chart.withHeadTags headTags
+        member this.WithHeadTags(headTags: XmlNode list) = this |> Chart.withHeadTags headTags
 
         /// Adds the necessary script tags to render tex strings to the chart's DisplayOptions
         [<CompiledName("WithMathTex")>]
         [<Extension>]
-        member this.WithMathTex([<Optional; DefaultParameterValue(true)>] ?AppendTags: bool) =
+        member this.WithMathTex
+            (
+                [<Optional; DefaultParameterValue(true)>] ?AppendTags: bool,
+                [<Optional; DefaultParameterValue(3)>] ?MathJaxVersion: int
+            ) =
             let append =
                 Option.defaultValue true AppendTags
 
-            this |> Chart.withMathTex (append)
+            this |> Chart.withMathTex (AppendTags = append, ?MathJaxVersion = MathJaxVersion)
 
 
         /// Save chart as html single page
@@ -975,11 +975,6 @@ module GenericChartExtensions =
         [<CompiledName("Show")>]
         [<Extension>]
         member this.Show() = this |> Chart.show
-
-        /// Show chart in browser
-        [<CompiledName("ShowAsImage")>]
-        [<Extension>]
-        member this.ShowAsImage(format: StyleParam.ImageFormat) = this |> Chart.showAsImage format
 
         /// Sets the polar object with the given id on the chart layout
         [<CompiledName("WithPolar")>]

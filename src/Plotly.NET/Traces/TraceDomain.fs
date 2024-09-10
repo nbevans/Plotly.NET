@@ -55,6 +55,7 @@ type TraceDomainStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Title">Sets the title of this trace.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -101,6 +102,7 @@ type TraceDomainStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -147,6 +149,7 @@ type TraceDomainStyle() =
             Title |> DynObj.setValueOpt trace "title"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -195,6 +198,7 @@ type TraceDomainStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Title">Sets the title of this trace.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -234,6 +238,7 @@ type TraceDomainStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -273,6 +278,7 @@ type TraceDomainStyle() =
             Title |> DynObj.setValueOpt trace "title"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -312,6 +318,7 @@ type TraceDomainStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Title">Sets the title of this trace.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -342,8 +349,8 @@ type TraceDomainStyle() =
     /// <param name="InsideTextFont">Sets the font used for `textinfo` lying inside the sector.</param>
     /// <param name="InsideTextOrientation">Controls the orientation of the text inside chart sectors. When set to "auto", text may be oriented in any direction in order to be as big as possible in the middle of a sector. The "horizontal" option orients text to be parallel with the bottom of the chart, and may make text smaller in order to achieve that goal. The "radial" option orients text along the radius of the sector. The "tangential" option orients text perpendicular to the radius of the sector.</param>
     /// <param name="OutsideTextFont">Sets the font used for `textinfo` lying outside the sector.</param>
-    /// <param name="Root">Sets the styles fot the root of this trace.</param>
-    /// <param name="Leaf">Sets the styles fot the leaves of this trace.</param>
+    /// <param name="Root">Sets the styles for the root of this trace.</param>
+    /// <param name="Leaf">Sets the styles for the leaves of this trace.</param>
     /// <param name="Level">Sets the level from which this trace hierarchy is rendered. Set `level` to `''` to start from the root node in the hierarchy. Must be an "id" if `ids` is filled in, otherwise plotly attempts to find a matching item in `labels`.</param>
     /// <param name="MaxDepth">Sets the number of rendered sectors from any given `level`. Set `maxdepth` to "-1" to render all the levels in the hierarchy.</param>
     /// <param name="Rotation">Rotates the whole diagram counterclockwise by some angle. By default the first slice starts at 3 o'clock.</param>
@@ -355,6 +362,7 @@ type TraceDomainStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -398,6 +406,7 @@ type TraceDomainStyle() =
             Title |> DynObj.setValueOpt trace "title"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -442,6 +451,7 @@ type TraceDomainStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Title">Sets the title of this trace.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -475,7 +485,7 @@ type TraceDomainStyle() =
     /// <param name="HoverLabel">Sets the style of the hoverlabels of this trace.</param>
     /// <param name="InsideTextFont">Sets the font used for `textinfo` lying inside the sector.</param>
     /// <param name="OutsideTextFont">Sets the font used for `textinfo` lying outside the sector.</param>
-    /// <param name="Root">Sets the styles fot the root of this trace.</param>
+    /// <param name="Root">Sets the styles for the root of this trace.</param>
     /// <param name="Level">Sets the level from which this trace hierarchy is rendered. Set `level` to `''` to start from the root node in the hierarchy. Must be an "id" if `ids` is filled in, otherwise plotly attempts to find a matching item in `labels`.</param>
     /// <param name="MaxDepth">Sets the number of rendered sectors from any given `level`. Set `maxdepth` to "-1" to render all the levels in the hierarchy.</param>
     /// <param name="UIRevision">Controls persistence of some user-driven changes to the trace: `constraintrange` in `parcoords` traces, as well as some `editable: true` modifications such as `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible` is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config: {editable: true}`) is controlled by `layout.editrevision`. Trace changes are tracked by `uid`, which only falls back on trace index if no `uid` is provided. So if your app can add/remove traces before the end of the `data` array, such that the same trace has a different index, you can still preserve user-driven changes if you give each trace a `uid` that stays with it as it moves.</param>
@@ -485,6 +495,7 @@ type TraceDomainStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -528,6 +539,7 @@ type TraceDomainStyle() =
             Title |> DynObj.setValueOpt trace "title"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -570,6 +582,7 @@ type TraceDomainStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -579,6 +592,7 @@ type TraceDomainStyle() =
     /// <param name="CustomData">Assigns extra data each datum. This may be useful when listening to hover, click and selection events. Note that, "scatter" traces also appends customdata items in the markers DOM elements</param>
     /// <param name="Domain">Sets the domain of this trace.</param>
     /// <param name="Line">Sets the line of this trace.</param>
+    /// <param name="Unselected">Sets the styles of unselected lines in this trace.</param>
     /// <param name="LabelAngle">Sets the angle of the labels with respect to the horizontal. For example, a `tickangle` of -90 draws the labels vertically. Tilted labels with "labelangle" may be positioned better inside margins when `labelposition` is set to "bottom".</param>
     /// <param name="LabelFont">Sets the label font of this trace.</param>
     /// <param name="LabelSide">Specifies the location of the `label`. "top" positions labels above, next to the title "bottom" positions labels below the graph Tilted labels with "labelangle" may be positioned better inside margins when `labelposition` is set to "bottom".</param>
@@ -589,6 +603,7 @@ type TraceDomainStyle() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -598,6 +613,7 @@ type TraceDomainStyle() =
             [<Optional; DefaultParameterValue(null)>] ?CustomData: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Domain: Domain,
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?LabelAngle: int,
             [<Optional; DefaultParameterValue(null)>] ?LabelFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?LabelSide: StyleParam.Side,
@@ -609,6 +625,7 @@ type TraceDomainStyle() =
 
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -618,6 +635,7 @@ type TraceDomainStyle() =
             CustomData |> DynObj.setValueOpt trace "customdata"
             Domain |> DynObj.setValueOpt trace "domain"
             Line |> DynObj.setValueOpt trace "line"
+            Unselected |> DynObj.setValueOpt trace "unselected"
             LabelAngle |> DynObj.setValueOpt trace "labelangle"
             LabelFont |> DynObj.setValueOpt trace "labelfont"
             LabelSide |> DynObj.setValueOpt trace "labelside"
@@ -632,6 +650,7 @@ type TraceDomainStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Counts">The number of observations represented by each state. Defaults to 1 so that each state represents one observation</param>
@@ -653,6 +672,7 @@ type TraceDomainStyle() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Counts: int,
@@ -675,6 +695,7 @@ type TraceDomainStyle() =
 
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Counts |> DynObj.setValueOpt trace "counts"
@@ -699,6 +720,7 @@ type TraceDomainStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -721,6 +743,7 @@ type TraceDomainStyle() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -744,6 +767,7 @@ type TraceDomainStyle() =
 
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
@@ -770,6 +794,7 @@ type TraceDomainStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
@@ -788,6 +813,7 @@ type TraceDomainStyle() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: bool,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
@@ -807,6 +833,7 @@ type TraceDomainStyle() =
 
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Ids |> DynObj.setValueOpt trace "ids"
@@ -829,6 +856,7 @@ type TraceDomainStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Title">Sets the title of this trace.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="Mode">Determines how the value is displayed on the graph. `number` displays the value numerically in text. `delta` displays the difference to a reference value in text. Finally, `gauge` displays the value graphically on an axis.</param>
@@ -838,15 +866,16 @@ type TraceDomainStyle() =
     /// <param name="CustomData">Assigns extra data each datum. This may be useful when listening to hover, click and selection events. Note that, "scatter" traces also appends customdata items in the markers DOM elements</param>
     /// <param name="Domain">Sets the domain of this trace.</param>
     /// <param name="Align">Sets the horizontal alignment of the `text` within the box. Note that this attribute has no effect if an angular gauge is displayed: in this case, it is always centered</param>
-    /// <param name="Delta">Sets the styling options for delta diplay.</param>
-    /// <param name="Number">Sets the styling options for number diplay.</param>
-    /// <param name="Gauge">Sets the styling options for gauge diplay.</param>
+    /// <param name="Delta">Sets the styling options for delta display.</param>
+    /// <param name="Number">Sets the styling options for number display.</param>
+    /// <param name="Gauge">Sets the styling options for gauge display.</param>
     /// <param name="UIRevision">Controls persistence of some user-driven changes to the trace: `constraintrange` in `parcoords` traces, as well as some `editable: true` modifications such as `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible` is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config: {editable: true}`) is controlled by `layout.editrevision`. Trace changes are tracked by `uid`, which only falls back on trace index if no `uid` is provided. So if your app can add/remove traces before the end of the `data` array, such that the same trace has a different index, you can still preserve user-driven changes if you give each trace a `uid` that stays with it as it moves.</param>
     static member Indicator
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Title: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Mode: StyleParam.IndicatorMode,
@@ -866,6 +895,7 @@ type TraceDomainStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Title |> DynObj.setValueOpt trace "title"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Mode |> DynObj.setValueOptBy trace "mode" StyleParam.IndicatorMode.convert
@@ -887,6 +917,7 @@ type TraceDomainStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
@@ -918,8 +949,8 @@ type TraceDomainStyle() =
     /// <param name="HoverLabel">Sets the style of the hoverlabels of this trace.</param>
     /// <param name="InsideTextFont">Sets the font used for `textinfo` lying inside the sector.</param>
     /// <param name="OutsideTextFont">Sets the font used for `textinfo` lying outside the sector.</param>
-    /// <param name="Root">Sets the styles fot the root of this trace.</param>
-    /// <param name="Leaf">Sets the leaves fot the root of this trace.</param>
+    /// <param name="Root">Sets the styles for the root of this trace.</param>
+    /// <param name="Leaf">Sets the leaves for the root of this trace.</param>
     /// <param name="Level">Sets the level from which this trace hierarchy is rendered. Set `level` to `''` to start from the root node in the hierarchy. Must be an "id" if `ids` is filled in, otherwise plotly attempts to find a matching item in `labels`.</param>
     /// <param name="MaxDepth">Sets the number of rendered sectors from any given `level`. Set `maxdepth` to "-1" to render all the levels in the hierarchy.</param>
     /// <param name="Sort">Determines whether or not the sectors are reordered from largest to smallest.</param>
@@ -928,6 +959,7 @@ type TraceDomainStyle() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
@@ -970,6 +1002,7 @@ type TraceDomainStyle() =
 
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Opacity |> DynObj.setValueOpt trace "opacity"

@@ -1,6 +1,7 @@
 namespace Plotly.NET
 
 open DynamicObj
+open InternalUtils
 open Plotly.NET.LayoutObjects
 open System
 open System.Runtime.InteropServices
@@ -14,7 +15,6 @@ type Layout() =
     /// </summary>
     /// <param name="Title">Sets the title of the layout.</param>
     /// <param name="ShowLegend">Determines whether or not a legend is drawn. Default is `true` if there is a trace to show and any of these: a) Two or more traces would by default be shown in the legend. b) One pie trace is shown in the legend. c) One trace is explicitly given with `showlegend: true`.</param>
-    /// <param name="Legend">Sets the legend styles of the layout.</param>
     /// <param name="Margin">Sets the margins around the layout.</param>
     /// <param name="AutoSize">Determines whether or not a layout width or height that has been left undefined by the user is initialized on each relayout. Note that, regardless of this attribute, an undefined layout width or height is always initialized on the first call to plot.</param>
     /// <param name="Width">Sets the plot's width (in px).</param>
@@ -32,6 +32,8 @@ type Layout() =
     /// <param name="ClickMode">Determines the mode of single click interactions. "event" is the default value and emits the `plotly_click` event. In addition this mode emits the `plotly_selected` event in drag modes "lasso" and "select", but with no event data attached (kept for compatibility reasons). The "select" flag enables selecting single data points via click. This mode also supports persistent selections, meaning that pressing Shift while clicking, adds to / subtracts from an existing selection. "select" with `hovermode`: "x" can be confusing, consider explicitly setting `hovermode`: "closest" when using this feature. Selection events are sent accordingly as long as "event" flag is set as well. When the "event" flag is missing, `plotly_click` and `plotly_selected` events are not fired.</param>
     /// <param name="DragMode">Determines the mode of drag interactions. "select" and "lasso" apply only to scatter traces with markers or text. "orbit" and "turntable" apply only to 3D scenes.</param>
     /// <param name="SelectDirection">When `dragmode` is set to "select", this limits the selection of the drag to horizontal, vertical or diagonal. "h" only allows horizontal selection, "v" only vertical, "d" only diagonal and "any" sets no limit.</param>
+    /// <param name="ActiveSelection">Sets the styling of the active selection</param>
+    /// <param name="NewSelection">Controls the behavior of newly drawn selections</param>
     /// <param name="HoverDistance">Sets the default distance (in pixels) to look for data to add hover labels (-1 means no cutoff, 0 means no looking for data). This is only a real distance for hovering on point-like objects, like scatter points. For area-like objects (bars, scatter fills, etc) hovering is on inside the area and off outside, but these objects will not supersede hover on point-like objects in case of conflict.</param>
     /// <param name="SpikeDistance">Sets the default distance (in pixels) to look for data to draw spikelines to (-1 means no cutoff, 0 means no looking for data). As with hoverdistance, distance does not apply to area-like objects. In addition, some objects can be hovered on but will not generate spikelines, such as scatter fills.</param>
     /// <param name="Hoverlabel">Sets the style ov hover labels.</param>
@@ -45,9 +47,13 @@ type Layout() =
     /// <param name="Computed">Placeholder for exporting automargin-impacting values namely `margin.t`, `margin.b`, `margin.l` and `margin.r` in "full-json" mode.</param>
     /// <param name="Grid">Sets the layout grid for arranging multiple plots</param>
     /// <param name="Calendar">Sets the default calendar system to use for interpreting and displaying dates throughout the plot.</param>
+    /// <param name="MinReducedHeight">Minimum height of the plot with margin.automargin applied (in px)</param>
+    /// <param name="MinReducedWidth">Minimum width of the plot with margin.automargin applied (in px)</param>
     /// <param name="NewShape">Controls the behavior of newly drawn shapes</param>
     /// <param name="ActiveShape">Sets the styling of the active shape</param>
     /// <param name="HideSources">Determines whether or not a text link citing the data source is placed at the bottom-right cored of the figure. Has only an effect only on graphs that have been generated via forked graphs from the Chart Studio Cloud (at https://chart-studio.plotly.com or on-premise).</param>
+    /// <param name="ScatterGap">Sets the gap (in plot fraction) between scatter points of adjacent location coordinates. Defaults to `bargap`.</param>
+    /// <param name="ScatterMode">Determines how scatter points at the same location coordinate are displayed on the graph. With "group", the scatter points are plotted next to one another centered around the shared location. With "overlay", the scatter points are plotted over one another, you might need to reduce "opacity" to see multiple scatter points.</param>
     /// <param name="BarGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarGroupGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarMode">Determines how bars at the same location coordinate are displayed on the graph. With "stack", the bars are stacked on top of one another With "relative", the bars are stacked on top of one another, with negative values below the axis, positive values above With "group", the bars are plotted next to one another centered around the shared location. With "overlay", the bars are plotted over one another, you might need to an "opacity" to see multiple bars.</param>
@@ -77,6 +83,7 @@ type Layout() =
     /// <param name="IcicleColorWay">Sets the default icicle slice colors. Defaults to the main `colorway` used for trace colors. If you specify a new list here it can still be extended with lighter and darker colors, see `extendiciclecolors`.</param>
     /// <param name="Annotations">A collection containing all Annotations of this layout. An annotation is a text element that can be placed anywhere in the plot. It can be positioned with respect to relative coordinates in the plot or with respect to the actual data coordinates of the graph. Annotations can be shown with or without an arrow.</param>
     /// <param name="Shapes">A collection containing all Shapes of this layout.</param>
+    /// <param name="Selections">A collection containing all Selections of this layout.</param>
     /// <param name="Images">A collection containing all Images of this layout. </param>
     /// <param name="Sliders">A collection containing all Sliders of this layout. </param>
     /// <param name="UpdateMenus">A collection containing all UpdateMenus of this layout. </param>
@@ -84,7 +91,6 @@ type Layout() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
-            [<Optional; DefaultParameterValue(null)>] ?Legend: Legend,
             [<Optional; DefaultParameterValue(null)>] ?Margin: Margin,
             [<Optional; DefaultParameterValue(null)>] ?AutoSize: bool,
             [<Optional; DefaultParameterValue(null)>] ?Width: int,
@@ -102,6 +108,8 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?ClickMode: StyleParam.ClickMode,
             [<Optional; DefaultParameterValue(null)>] ?DragMode: StyleParam.DragMode,
             [<Optional; DefaultParameterValue(null)>] ?SelectDirection: StyleParam.SelectDirection,
+            [<Optional; DefaultParameterValue(null)>] ?ActiveSelection: ActiveSelection,
+            [<Optional; DefaultParameterValue(null)>] ?NewSelection: NewSelection,
             [<Optional; DefaultParameterValue(null)>] ?HoverDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?SpikeDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?Hoverlabel: Hoverlabel,
@@ -115,9 +123,13 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?Computed: string,
             [<Optional; DefaultParameterValue(null)>] ?Grid: LayoutGrid,
             [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar,
-            [<Optional; DefaultParameterValue(null)>] ?NewShape: Shape,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedHeight: int,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedWidth: int,
+            [<Optional; DefaultParameterValue(null)>] ?NewShape: NewShape,
             [<Optional; DefaultParameterValue(null)>] ?ActiveShape: ActiveShape,
             [<Optional; DefaultParameterValue(null)>] ?HideSources: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterGap: float,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterMode: StyleParam.ScatterMode,
             [<Optional; DefaultParameterValue(null)>] ?BarGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarGroupGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarMode: StyleParam.BarMode,
@@ -147,6 +159,7 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?IcicleColorWay: Color,
             [<Optional; DefaultParameterValue(null)>] ?Annotations: seq<Annotation>,
             [<Optional; DefaultParameterValue(null)>] ?Shapes: seq<Shape>,
+            [<Optional; DefaultParameterValue(null)>] ?Selections: seq<Selection>,
             [<Optional; DefaultParameterValue(null)>] ?Images: seq<LayoutImage>,
             [<Optional; DefaultParameterValue(null)>] ?Sliders: seq<Slider>,
             [<Optional; DefaultParameterValue(null)>] ?UpdateMenus: seq<UpdateMenu>
@@ -155,7 +168,6 @@ type Layout() =
         |> Layout.style (
             ?Title = Title,
             ?ShowLegend = ShowLegend,
-            ?Legend = Legend,
             ?Margin = Margin,
             ?AutoSize = AutoSize,
             ?Width = Width,
@@ -173,6 +185,8 @@ type Layout() =
             ?ClickMode = ClickMode,
             ?DragMode = DragMode,
             ?SelectDirection = SelectDirection,
+            ?NewSelection = NewSelection,
+            ?ActiveSelection = ActiveSelection,
             ?HoverDistance = HoverDistance,
             ?SpikeDistance = SpikeDistance,
             ?Hoverlabel = Hoverlabel,
@@ -187,8 +201,12 @@ type Layout() =
             ?Grid = Grid,
             ?Calendar = Calendar,
             ?NewShape = NewShape,
+            ?MinReducedHeight = MinReducedHeight,
+            ?MinReducedWidth = MinReducedWidth,
             ?ActiveShape = ActiveShape,
             ?HideSources = HideSources,
+            ?ScatterGap = ScatterGap,
+            ?ScatterMode = ScatterMode,
             ?BarGap = BarGap,
             ?BarGroupGap = BarGroupGap,
             ?BarMode = BarMode,
@@ -218,6 +236,7 @@ type Layout() =
             ?IcicleColorWay = IcicleColorWay,
             ?Annotations = Annotations,
             ?Shapes = Shapes,
+            ?Selections = Selections,
             ?Images = Images,
             ?Sliders = Sliders,
             ?UpdateMenus = UpdateMenus
@@ -228,7 +247,6 @@ type Layout() =
     /// </summary>
     /// <param name="Title">Sets the title of the layout.</param>
     /// <param name="ShowLegend">Determines whether or not a legend is drawn. Default is `true` if there is a trace to show and any of these: a) Two or more traces would by default be shown in the legend. b) One pie trace is shown in the legend. c) One trace is explicitly given with `showlegend: true`.</param>
-    /// <param name="Legend">Sets the legend styles of the layout.</param>
     /// <param name="Margin">Sets the margins around the layout.</param>
     /// <param name="AutoSize">Determines whether or not a layout width or height that has been left undefined by the user is initialized on each relayout. Note that, regardless of this attribute, an undefined layout width or height is always initialized on the first call to plot.</param>
     /// <param name="Width">Sets the plot's width (in px).</param>
@@ -246,6 +264,8 @@ type Layout() =
     /// <param name="ClickMode">Determines the mode of single click interactions. "event" is the default value and emits the `plotly_click` event. In addition this mode emits the `plotly_selected` event in drag modes "lasso" and "select", but with no event data attached (kept for compatibility reasons). The "select" flag enables selecting single data points via click. This mode also supports persistent selections, meaning that pressing Shift while clicking, adds to / subtracts from an existing selection. "select" with `hovermode`: "x" can be confusing, consider explicitly setting `hovermode`: "closest" when using this feature. Selection events are sent accordingly as long as "event" flag is set as well. When the "event" flag is missing, `plotly_click` and `plotly_selected` events are not fired.</param>
     /// <param name="DragMode">Determines the mode of drag interactions. "select" and "lasso" apply only to scatter traces with markers or text. "orbit" and "turntable" apply only to 3D scenes.</param>
     /// <param name="SelectDirection">When `dragmode` is set to "select", this limits the selection of the drag to horizontal, vertical or diagonal. "h" only allows horizontal selection, "v" only vertical, "d" only diagonal and "any" sets no limit.</param>
+    /// <param name="ActiveSelection">Sets the styling of the active selection</param>
+    /// <param name="NewSelection">Controls the behavior of newly drawn selections</param>
     /// <param name="HoverDistance">Sets the default distance (in pixels) to look for data to add hover labels (-1 means no cutoff, 0 means no looking for data). This is only a real distance for hovering on point-like objects, like scatter points. For area-like objects (bars, scatter fills, etc) hovering is on inside the area and off outside, but these objects will not supersede hover on point-like objects in case of conflict.</param>
     /// <param name="SpikeDistance">Sets the default distance (in pixels) to look for data to draw spikelines to (-1 means no cutoff, 0 means no looking for data). As with hoverdistance, distance does not apply to area-like objects. In addition, some objects can be hovered on but will not generate spikelines, such as scatter fills.</param>
     /// <param name="Hoverlabel">Sets the style ov hover labels.</param>
@@ -259,9 +279,13 @@ type Layout() =
     /// <param name="Computed">Placeholder for exporting automargin-impacting values namely `margin.t`, `margin.b`, `margin.l` and `margin.r` in "full-json" mode.</param>
     /// <param name="Grid">Sets the layout grid for arranging multiple plots</param>
     /// <param name="Calendar">Sets the default calendar system to use for interpreting and displaying dates throughout the plot.</param>
+    /// <param name="MinReducedHeight">Minimum height of the plot with margin.automargin applied (in px)</param>
+    /// <param name="MinReducedWidth">Minimum width of the plot with margin.automargin applied (in px)</param>
     /// <param name="NewShape">Controls the behavior of newly drawn shapes</param>
     /// <param name="ActiveShape">Sets the styling of the active shape</param>
     /// <param name="HideSources">Determines whether or not a text link citing the data source is placed at the bottom-right cored of the figure. Has only an effect only on graphs that have been generated via forked graphs from the Chart Studio Cloud (at https://chart-studio.plotly.com or on-premise).</param>
+    /// <param name="ScatterGap">Sets the gap (in plot fraction) between scatter points of adjacent location coordinates. Defaults to `bargap`.</param>
+    /// <param name="ScatterMode">Determines how scatter points at the same location coordinate are displayed on the graph. With "group", the scatter points are plotted next to one another centered around the shared location. With "overlay", the scatter points are plotted over one another, you might need to reduce "opacity" to see multiple scatter points.</param>
     /// <param name="BarGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarGroupGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarMode">Determines how bars at the same location coordinate are displayed on the graph. With "stack", the bars are stacked on top of one another With "relative", the bars are stacked on top of one another, with negative values below the axis, positive values above With "group", the bars are plotted next to one another centered around the shared location. With "overlay", the bars are plotted over one another, you might need to an "opacity" to see multiple bars.</param>
@@ -291,6 +315,7 @@ type Layout() =
     /// <param name="IcicleColorWay">Sets the default icicle slice colors. Defaults to the main `colorway` used for trace colors. If you specify a new list here it can still be extended with lighter and darker colors, see `extendiciclecolors`.</param>
     /// <param name="Annotations">A collection containing all Annotations of this layout. An annotation is a text element that can be placed anywhere in the plot. It can be positioned with respect to relative coordinates in the plot or with respect to the actual data coordinates of the graph. Annotations can be shown with or without an arrow.</param>
     /// <param name="Shapes">A collection containing all Shapes of this layout.</param>
+    /// <param name="Selections">A collection containing all Selections of this layout.</param>
     /// <param name="Images">A collection containing all Images of this layout. </param>
     /// <param name="Sliders">A collection containing all Sliders of this layout. </param>
     /// <param name="UpdateMenus">A collection containing all UpdateMenus of this layout. </param>
@@ -298,7 +323,6 @@ type Layout() =
         (
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
-            [<Optional; DefaultParameterValue(null)>] ?Legend: Legend,
             [<Optional; DefaultParameterValue(null)>] ?Margin: Margin,
             [<Optional; DefaultParameterValue(null)>] ?AutoSize: bool,
             [<Optional; DefaultParameterValue(null)>] ?Width: int,
@@ -316,6 +340,8 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?ClickMode: StyleParam.ClickMode,
             [<Optional; DefaultParameterValue(null)>] ?DragMode: StyleParam.DragMode,
             [<Optional; DefaultParameterValue(null)>] ?SelectDirection: StyleParam.SelectDirection,
+            [<Optional; DefaultParameterValue(null)>] ?ActiveSelection: ActiveSelection,
+            [<Optional; DefaultParameterValue(null)>] ?NewSelection: NewSelection,
             [<Optional; DefaultParameterValue(null)>] ?HoverDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?SpikeDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?Hoverlabel: Hoverlabel,
@@ -329,9 +355,13 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?Computed: string,
             [<Optional; DefaultParameterValue(null)>] ?Grid: LayoutGrid,
             [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar,
-            [<Optional; DefaultParameterValue(null)>] ?NewShape: Shape,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedHeight: int,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedWidth: int,
+            [<Optional; DefaultParameterValue(null)>] ?NewShape: NewShape,
             [<Optional; DefaultParameterValue(null)>] ?ActiveShape: ActiveShape,
             [<Optional; DefaultParameterValue(null)>] ?HideSources: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterGap: float,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterMode: StyleParam.ScatterMode,
             [<Optional; DefaultParameterValue(null)>] ?BarGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarGroupGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarMode: StyleParam.BarMode,
@@ -361,6 +391,7 @@ type Layout() =
             [<Optional; DefaultParameterValue(null)>] ?IcicleColorWay: Color,
             [<Optional; DefaultParameterValue(null)>] ?Annotations: seq<Annotation>,
             [<Optional; DefaultParameterValue(null)>] ?Shapes: seq<Shape>,
+            [<Optional; DefaultParameterValue(null)>] ?Selections: seq<Selection>,
             [<Optional; DefaultParameterValue(null)>] ?Images: seq<LayoutImage>,
             [<Optional; DefaultParameterValue(null)>] ?Sliders: seq<Slider>,
             [<Optional; DefaultParameterValue(null)>] ?UpdateMenus: seq<UpdateMenu>
@@ -369,7 +400,6 @@ type Layout() =
 
             Title |> DynObj.setValueOpt layout "title"
             ShowLegend |> DynObj.setValueOpt layout "showlegend"
-            Legend |> DynObj.setValueOpt layout "legend"
             Margin |> DynObj.setValueOpt layout "margin"
             AutoSize |> DynObj.setValueOpt layout "autosize"
             Width |> DynObj.setValueOpt layout "width"
@@ -387,6 +417,8 @@ type Layout() =
             ClickMode |> DynObj.setValueOptBy layout "clickmode" StyleParam.ClickMode.convert
             DragMode |> DynObj.setValueOptBy layout "dragmode" StyleParam.DragMode.convert
             SelectDirection |> DynObj.setValueOptBy layout "selectdirection" StyleParam.SelectDirection.convert
+            ActiveSelection |> DynObj.setValueOpt layout "activeselection"
+            NewSelection |> DynObj.setValueOpt layout "newselection"
             HoverDistance |> DynObj.setValueOpt layout "hoverdistance"
             SpikeDistance |> DynObj.setValueOpt layout "spikedistance"
             Hoverlabel |> DynObj.setValueOpt layout "hoverlabel"
@@ -400,9 +432,13 @@ type Layout() =
             Computed |> DynObj.setValueOpt layout "computed"
             Grid |> DynObj.setValueOpt layout "grid"
             Calendar |> DynObj.setValueOptBy layout "calendar" StyleParam.Calendar.convert
+            MinReducedHeight |> DynObj.setValueOpt layout "minreducedheight"
+            MinReducedWidth |> DynObj.setValueOpt layout "minreducedwidth"
             NewShape |> DynObj.setValueOpt layout "newshape"
             ActiveShape |> DynObj.setValueOpt layout "activeshape"
             HideSources |> DynObj.setValueOpt layout "hidesources"
+            ScatterGap |> DynObj.setValueOpt layout "scattergap"
+            ScatterMode |> DynObj.setValueOptBy layout "scattermode" StyleParam.ScatterMode.convert
             BarGap |> DynObj.setValueOpt layout "bargap"
             BarGroupGap |> DynObj.setValueOpt layout "bargroupgap"
             BarMode |> DynObj.setValueOptBy layout "barmode" StyleParam.BarMode.convert
@@ -422,7 +458,7 @@ type Layout() =
             FunnelGap |> DynObj.setValueOpt layout "funnelgap"
             FunnelGroupGap |> DynObj.setValueOpt layout "funnelgroupgap"
             FunnelMode |> DynObj.setValueOptBy layout "funnelmode" StyleParam.FunnelMode.convert
-            ExtendFunnelAreaColors |> DynObj.setValueOpt layout "extendfunnelareacolors "
+            ExtendFunnelAreaColors |> DynObj.setValueOpt layout "extendfunnelareacolors"
             FunnelAreaColorWay |> DynObj.setValueOpt layout "funnelareacolorway"
             ExtendSunBurstColors |> DynObj.setValueOpt layout "extendsunburstcolors"
             SunBurstColorWay |> DynObj.setValueOpt layout "sunburstcolorway"
@@ -432,15 +468,77 @@ type Layout() =
             IcicleColorWay |> DynObj.setValueOpt layout "iciclecolorway"
             Annotations |> DynObj.setValueOpt layout "annotations"
             Shapes |> DynObj.setValueOpt layout "shapes"
+            Selections |> DynObj.setValueOpt layout "selections"
             Images |> DynObj.setValueOpt layout "images"
             Sliders |> DynObj.setValueOpt layout "sliders"
             UpdateMenus |> DynObj.setValueOpt layout "updatemenus"
 
             layout)
 
+    /// <summary>
+    /// Combines two Layout objects.
+    ///
+    /// In case of duplicate dynamic member values, the values of the second Layout are used.
+    ///
+    /// For the collections used for the dynamic members
+    ///
+    /// annotations, shapes, selections, images, sliders, hiddenlabels, updatemenus
+    ///
+    /// the values from the second Layout are appended to those of the first instead.
+    /// </summary>
+    /// <param name="first">The first Layout to combine with the second</param>
+    /// <param name="second">The second Layout to combine with the first</param>
+    static member combine (first: Layout) (second: Layout) =
+
+        let annotations =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<Annotation>>("annotations"))
+                (second.TryGetTypedValue<seq<Annotation>>("annotations"))
+
+        let shapes =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<Shape>>("shapes"))
+                (second.TryGetTypedValue<seq<Shape>>("shapes"))
+
+        let selections =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<Selection>>("selections"))
+                (second.TryGetTypedValue<seq<Selection>>("selections"))
+
+        let images =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<LayoutImage>>("images"))
+                (second.TryGetTypedValue<seq<LayoutImage>>("images"))
+
+        let sliders =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<Slider>>("sliders"))
+                (second.TryGetTypedValue<seq<Slider>>("sliders"))
+
+        let hiddenLabels =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<string>>("hiddenlabels"))
+                (second.TryGetTypedValue<seq<string>>("hiddenlabels"))
+
+        let updateMenus =
+            InternalUtils.combineOptSeqs
+                (first.TryGetTypedValue<seq<UpdateMenu>>("updatemenus"))
+                (second.TryGetTypedValue<seq<UpdateMenu>>("updatemenus"))
+
+        DynObj.combine first second
+        |> unbox
+        |> Layout.style (
+            ?Annotations = annotations,
+            ?Shapes = shapes,
+            ?Selections = selections,
+            ?Images = images,
+            ?Sliders = sliders,
+            ?HiddenLabels = hiddenLabels,
+            ?UpdateMenus = updateMenus
+        )
 
     /// <summary>
-    /// Returns Some(dynamic member value) of the trace object's underlying DynamicObj when a dynamic member eith the given name exists, and None otherwise.
+    /// Returns Some(dynamic member value) of the trace object's underlying DynamicObj when a dynamic member with the given name exists, and None otherwise.
     /// </summary>
     /// <param name="propName">The name of the dynamic member to get the value of</param>
     /// <param name="layout">The layout to get the dynamic member value from</param>
@@ -485,6 +583,34 @@ type Layout() =
     /// <param name="id">The target axis id</param>
     static member getLinearAxisById(id: StyleParam.SubPlotId) =
         (fun (layout: Layout) -> layout |> Layout.tryGetLinearAxisById id |> Option.defaultValue (LinearAxis.init ()))
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid x axes (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the x axes from</param>
+    static member getXAxes (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidXAxisId kv.Key then
+                match layout.TryGetTypedValue<LinearAxis>(kv.Key) with
+                | Some axis -> Some (kv.Key, axis)
+                | None -> None
+            else None
+        )
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid y axes (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the y axes from</param>
+    static member getYAxes (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidYAxisId kv.Key then
+                match layout.TryGetTypedValue<LinearAxis>(kv.Key) with
+                | Some axis -> Some (kv.Key, axis)
+                | None -> None
+            else None
+        )
 
     /// <summary>
     /// Sets a linear axis object on the layout as a dynamic property with the given axis id.
@@ -535,6 +661,21 @@ type Layout() =
     static member getSceneById(id: StyleParam.SubPlotId) =
         (fun (layout: Layout) -> layout |> Layout.tryGetSceneById id |> Option.defaultValue (Scene.init ()))
 
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid scenes (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the scenes from</param>
+    static member getScenes (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidSceneId kv.Key then
+                match layout.TryGetTypedValue<Scene>(kv.Key) with
+                | Some scene -> Some (kv.Key, scene)
+                | None -> None
+            else None
+        )
+
     /// <summary>
     /// Sets a scene object on the layout as a dynamic property with the given scene id.
     /// </summary>
@@ -575,6 +716,20 @@ type Layout() =
     /// <param name="id">The target geo id</param>
     static member getGeoById(id: StyleParam.SubPlotId) =
         (fun (layout: Layout) -> layout |> Layout.tryGetGeoById id |> Option.defaultValue (Geo.init ()))
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid geo subplots (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the geos from</param>
+    static member getGeos (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidGeoId kv.Key then
+                match layout.TryGetTypedValue<Geo>(kv.Key) with
+                | Some geo -> Some (kv.Key, geo)
+                | None -> None
+            else None
+        )
 
     /// <summary>
     /// Sets a geo object on the layout as a dynamic property with the given geo id.
@@ -618,6 +773,20 @@ type Layout() =
     /// <param name="id">The target mapbox id</param>
     static member getMapboxById(id: StyleParam.SubPlotId) =
         (fun (layout: Layout) -> layout |> Layout.tryGetMapboxById id |> Option.defaultValue (Mapbox.init ()))
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid mapbox subplots (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the mapboxes from</param>
+    static member getMapboxes (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidMapboxId kv.Key then
+                match layout.TryGetTypedValue<Mapbox>(kv.Key) with
+                | Some mapbox -> Some (kv.Key, mapbox)
+                | None -> None
+            else None
+        )
 
     /// <summary>
     /// Sets a mapbox object on the layout as a dynamic property with the given mapbox id.
@@ -665,6 +834,20 @@ type Layout() =
         (fun (layout: Layout) -> layout |> Layout.tryGetPolarById id |> Option.defaultValue (Polar.init ()))
 
     /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid polar subplots (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the polars from</param>
+    static member getPolars (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidPolarId kv.Key then
+                match layout.TryGetTypedValue<Polar>(kv.Key) with
+                | Some polar -> Some (kv.Key, polar)
+                | None -> None
+            else None
+        )
+
+    /// <summary>
     /// Sets a polar object on the layout as a dynamic property with the given polar id.
     /// </summary>
     /// <param name="id">The scene id of the new geo</param>
@@ -708,6 +891,20 @@ type Layout() =
     /// <param name="id">The target smith id</param>
     static member getSmithById(id: StyleParam.SubPlotId) =
         (fun (layout: Layout) -> layout |> Layout.tryGetSmithById id |> Option.defaultValue (Smith.init ()))
+
+    /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid smith subplots (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the smiths from</param>
+    static member getSmiths (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidSmithId kv.Key then
+                match layout.TryGetTypedValue<Smith>(kv.Key) with
+                | Some smith -> Some (kv.Key, smith)
+                | None -> None
+            else None
+        )
 
     /// <summary>
     /// Sets a smith object on the layout as a dynamic property with the given smith id.
@@ -755,6 +952,20 @@ type Layout() =
         (fun (layout: Layout) -> layout |> Layout.tryGetColorAxisById id |> Option.defaultValue (ColorAxis.init ()))
 
     /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid color axes (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the color axes from</param>
+    static member getColorAxes (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidColorAxisId kv.Key then
+                match layout.TryGetTypedValue<ColorAxis>(kv.Key) with
+                | Some colorAxis -> Some (kv.Key, colorAxis)
+                | None -> None
+            else None
+        )
+
+    /// <summary>
     /// Sets a ColorAxis object on the layout as a dynamic property with the given ColorAxis id.
     /// </summary>
     /// <param name="id">The ColorAxis id of the new ColorAxis</param>
@@ -800,6 +1011,20 @@ type Layout() =
         (fun (layout: Layout) -> layout |> Layout.tryGetTernaryById id |> Option.defaultValue (Ternary.init ()))
 
     /// <summary>
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid ternary subplots (if the key matches and object can be cast to the correct type).
+    /// </summary>
+    /// <param name="layout">The layout to get the ternaries from</param>
+    static member getTernaries (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidTernaryId kv.Key then
+                match layout.TryGetTypedValue<Ternary>(kv.Key) with
+                | Some ternary -> Some (kv.Key, ternary)
+                | None -> None
+            else None
+        )
+
+    /// <summary>
     /// Sets a Ternary object on the layout as a dynamic property with the given Ternary id.
     /// </summary>
     /// <param name="id">The Ternary id of the new ColorAxis</param>
@@ -841,30 +1066,71 @@ type Layout() =
             layout |> Layout.setLayoutGrid combined)
 
     /// <summary>
-    /// Returns the legend object of the given layout.
-    ///
-    /// If there is no legend set, returns an empty Legend object.
+    /// Returns Some(Legend) if there is an Legend object set on the layout with the given id, and None otherwise.
     /// </summary>
-    /// <param name="layout">The layout to get the legend from</param>
-    static member getLegend(layout: Layout) =
-        layout |> Layout.tryGetTypedMember<Legend> "legend" |> Option.defaultValue (Legend.init ())
+    /// <param name="id">The target Legend id</param>
+    static member tryGetLegendById(id: StyleParam.SubPlotId) =
+        (fun (layout: Layout) -> layout.TryGetTypedValue<Legend>(StyleParam.SubPlotId.toString id))
 
     /// <summary>
-    /// Returns a function that sets the Legend object of the given trace.
+    /// Returns a sequence of key-value pairs of the layout's dynamic members that are valid legends (if the key matches and object can be cast to the correct type).
     /// </summary>
-    /// <param name="legend">The new Legend object</param>
-    static member setLegend(legend: Legend) =
-        (fun (layout: Layout) ->
-            layout.SetValue("legend", legend)
-            layout)
+    /// <param name="layout">The layout to get the color axes from</param>
+    static member getLegends (layout: Layout) =
+        layout.GetProperties(includeInstanceProperties = false)
+        |> Seq.choose (fun kv -> 
+            if StyleParam.SubPlotId.isValidLegendId kv.Key then
+                match layout.TryGetTypedValue<Legend>(kv.Key) with
+                | Some legend -> Some (kv.Key, legend)
+                | None -> None
+            else None
+        )
 
     /// <summary>
     /// Combines the given Legend object with the one already present on the layout.
     /// </summary>
-    /// <param name="legend">The updated Legend object</param>
-    static member updateLegend(legend: Legend) =
+    /// <param name="id">The target Legend id</param>
+    /// <param name="legend">The updated Legend object.</param>
+    static member updateLegendById(id: StyleParam.SubPlotId, legend: Legend) =
         (fun (layout: Layout) ->
-            let combined =
-                (DynObj.combine (layout |> Layout.getLegend) legend) :?> Legend
 
-            layout |> Layout.setLegend combined)
+            match id with
+            | StyleParam.SubPlotId.Legend _ ->
+
+                let legend' =
+                    match Layout.tryGetLegendById id layout with
+                    | Some l -> (DynObj.combine l legend) :?> Legend
+                    | None -> legend
+
+                legend' |> DynObj.setValue layout (StyleParam.SubPlotId.toString id)
+
+                layout
+            | _ ->
+                failwith
+                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a legend on layout")
+
+    /// <summary>
+    /// Returns the Legend object of the layout with the given id.
+    ///
+    /// If there is no Legend set, returns an empty Legend object.
+    /// </summary>
+    /// <param name="id">The target Legend id</param>
+    static member getLegendById(id: StyleParam.SubPlotId) =
+        (fun (layout: Layout) -> layout |> Layout.tryGetLegendById id |> Option.defaultValue (Legend.init ()))
+
+    /// <summary>
+    /// Sets a linear Legend object on the layout as a dynamic property with the given Legend id.
+    /// </summary>
+    /// <param name="id">The Legend id of the new Legend</param>
+    /// <param name="legend">The Legend to add to the layout.</param>
+    static member setLegend(id: StyleParam.SubPlotId, legend: Legend) =
+        (fun (layout: Layout) ->
+
+            match id with
+            | StyleParam.SubPlotId.Legend _ ->
+                legend |> DynObj.setValue layout (StyleParam.SubPlotId.toString id)
+                layout
+
+            | _ ->
+                failwith
+                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a Legend on layout")

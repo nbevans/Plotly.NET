@@ -43,7 +43,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseWebGL">If true, plotly.js will use the WebGL engine to render this chart. use this when you want to render many objects at once.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart ScatterPolar<RType, ThetaType, TextType>(
+        public static GenericChart ScatterPolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             StyleParam.Mode mode,
@@ -124,7 +124,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Marker">Sets the marker (use this for more finegrained control than the other marker-associated arguments)</param>
         /// <param name="UseWebGL">If true, plotly.js will use the WebGL engine to render this chart. use this when you want to render many objects at once.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart PointPolar<RType, ThetaType, TextType>(
+        public static GenericChart PointPolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             Optional<string> Name = default,
@@ -177,7 +177,7 @@ namespace Plotly.NET.CSharp
         /// </summary>
         /// <param name="r">Sets the radial coordinates of the plotted data</param>
         /// <param name="theta">Sets the angular coordinates of the plotted data</param>
-        /// <param name="ShowMarkers">Wether to show markers for the datums additionally to the line</param>
+        /// <param name="ShowMarkers">Whether to show markers for the datums additionally to the line</param>
         /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover</param>
         /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
         /// <param name="Opacity">Sets the opactity of the trace</param>
@@ -199,7 +199,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseWebGL">If true, plotly.js will use the WebGL engine to render this chart. use this when you want to render many objects at once.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart LinePolar<RType, ThetaType, TextType>(
+        public static GenericChart LinePolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             Optional<bool> ShowMarkers = default,
@@ -264,7 +264,7 @@ namespace Plotly.NET.CSharp
         /// </summary>
         /// <param name="r">Sets the radial coordinates of the plotted data</param>
         /// <param name="theta">Sets the angular coordinates of the plotted data</param>
-        /// <param name="ShowMarkers">Wether to show markers for the datums additionally to the line</param>
+        /// <param name="ShowMarkers">Whether to show markers for the datums additionally to the line</param>
         /// <param name="Smoothing">Sets the amount of smoothing. "0" corresponds to no smoothing (equivalent to a "linear" shape).  Use values between 0. and 1.3</param>
         /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover</param>
         /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
@@ -287,7 +287,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseWebGL">If true, plotly.js will use the WebGL engine to render this chart. use this when you want to render many objects at once.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart SplinePolar<RType, ThetaType, TextType>(
+        public static GenericChart SplinePolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             Optional<bool> ShowMarkers = default,
@@ -371,7 +371,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Marker">Sets the marker (use this for more finegrained control than the other marker-associated arguments)</param>
         /// <param name="UseWebGL">If true, plotly.js will use the WebGL engine to render this chart. use this when you want to render many objects at once.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart BubblePolar<RType, ThetaType, TextType>(
+        public static GenericChart BubblePolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             IEnumerable<int> sizes,
@@ -443,7 +443,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Width">Sets the bar width (in position axis units) of all bars.</param>
         /// <param name="MultiWidth">Sets the individual bar width (in position axis units) for each bar.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart BarPolar<RType, ThetaType, TextType>(
+        public static GenericChart BarPolar<RType, ThetaType, TextType>(
             IEnumerable<RType> r,
             IEnumerable<ThetaType> theta,
             Optional<string> Name = default,

@@ -1,6 +1,8 @@
 ﻿namespace Plotly.NET
 
 open System
+open System.Text
+open System.Text.RegularExpressions
 // https://plot.ly/javascript/reference/
 // https://plot.ly/javascript-graphing-library/reference/
 
@@ -10,8 +12,22 @@ module StyleParam =
 
 
     //--------------------------
-// #A#
-//--------------------------
+    // #A#
+    //--------------------------
+
+    [<RequireQualifiedAccess>]
+    type AngleRef =
+        | Previous
+        | Up
+
+        static member toString =
+            function
+            | Previous -> "previous"
+            | Up -> "up"
+
+        static member convert = AngleRef.toString >> box
+        override this.ToString() = this |> AngleRef.toString
+        member this.Convert() = this |> AngleRef.convert
 
     [<RequireQualifiedAccess>]
     type ArrowSide =
@@ -30,6 +46,32 @@ module StyleParam =
         static member convert = ArrowSide.toString >> box
         override this.ToString() = this |> ArrowSide.toString
         member this.Convert() = this |> ArrowSide.convert
+
+    [<RequireQualifiedAccess>]
+    type TickAutoMargin =
+        | Height
+        | Width
+        | Left
+        | Right
+        | Top
+        | Bottom
+        | All
+        | Custom of seq<TickAutoMargin>
+
+        static member toString =
+            function
+            | Height -> "height"
+            | Width -> "width"
+            | Left -> "left"
+            | Right -> "right"
+            | Top -> "top"
+            | Bottom -> "bottom"
+            | All -> "height+width+left+right+top+bottom"
+            | Custom s -> s |> Seq.map (fun a -> a |> TickAutoMargin.toString) |> String.concat "+"
+
+        static member convert = TickAutoMargin.toString >> box
+        override this.ToString() = this |> TickAutoMargin.toString
+        member this.Convert() = this |> TickAutoMargin.convert
 
     [<RequireQualifiedAccess>]
     type AnnotationAlignment =
@@ -84,18 +126,28 @@ module StyleParam =
         override this.ToString() = this |> Align.toString
         member this.Convert() = this |> Align.convert
 
-    /// Determines whether or not the range of this axis is computed in relation to the input data. See `rangemode` for more info. If `range` is provided, then `autorange` is set to "false".
+    /// <summary>
+    /// Determines whether or not the range of this axis is computed in relation to the input data. See `rangemode` for more info. If `range` is provided and it has a value for both the lower and upper bound, `autorange` is set to "false". Using "min" applies autorange only to set the minimum. Using "max" applies autorange only to set the maximum. Using "min reversed" applies autorange only to set the minimum on a reversed axis. Using "max reversed" applies autorange only to set the maximum on a reversed axis. Using "reversed" applies autorange on both ends and reverses the axis direction.
+    /// </summary>
     [<RequireQualifiedAccess>]
     type AutoRange =
         | True
         | False
         | Reversed
+        | MinReversed
+        | MaxReversed
+        | Min
+        | Max
 
         static member convert =
             function
             | True -> box true
             | False -> box false
             | Reversed -> box "reversed"
+            | MinReversed -> box "min reversed"
+            | MaxReversed -> box "max reversed"
+            | Min -> box "min"
+            | Max -> box "max"
 
         member this.Convert() = this |> AutoRange.convert
 
@@ -149,11 +201,13 @@ module StyleParam =
 
     [<RequireQualifiedAccess>]
     type LinearAxisId =
+        | Free
         | X of int
         | Y of int
 
         static member toString =
             function
+            | Free -> "free"
             | X id -> if id < 2 then "x" else sprintf "x%i" id
             | Y id -> if id < 2 then "y" else sprintf "y%i" id
 
@@ -175,6 +229,7 @@ module StyleParam =
         | Scene of int
         | Carpet of string
         | Smith of int
+        | Legend of int
 
         static member toString =
             function
@@ -225,10 +280,29 @@ module StyleParam =
                 else
                     sprintf "smith%i" id
             | Carpet id -> id
+            | Legend id ->
+                if id < 2 then
+                    "legend"
+                else
+                    sprintf "legend%i" id
+
+        static member isValidXAxisId (id: string) = Regex.IsMatch(id, "xaxis[0-9]*")
+        static member isValidYAxisId (id: string) = Regex.IsMatch(id, "yaxis[0-9]*")
+        static member isValidZAxisId (id: string) = Regex.IsMatch(id, "zaxis")
+        static member isValidColorAxisId (id: string) = Regex.IsMatch(id, "coloraxis[0-9]*")
+        static member isValidGeoId (id: string) = Regex.IsMatch(id, "geo[0-9]*")
+        static member isValidMapboxId (id: string) = Regex.IsMatch(id, "mapbox[0-9]*")
+        static member isValidPolarId (id: string) = Regex.IsMatch(id, "polar[0-9]*")
+        static member isValidTernaryId (id: string) = Regex.IsMatch(id, "ternary[0-9]*")
+        static member isValidSceneId (id: string) = Regex.IsMatch(id, "scene[0-9]*")
+        static member isValidSmithId (id: string) = Regex.IsMatch(id, "smith[0-9]*")
+        static member isValidLegendId (id: string) = Regex.IsMatch(id, "legend[0-9]*")
 
         static member convert = SubPlotId.toString >> box
         override this.ToString() = this |> SubPlotId.toString
         member this.Convert() = this |> SubPlotId.convert
+
+
 
     [<RequireQualifiedAccess>]
     type AutoTypeNumbers =
@@ -263,8 +337,24 @@ module StyleParam =
         member this.Convert() = this |> AngularUnit.convert
 
     //--------------------------
-// #B#
-//--------------------------
+    // #B#
+    //--------------------------
+
+    [<RequireQualifiedAccess>]
+    type BackOff =
+        | Auto
+        | Value of int
+        | Array of seq<int>
+
+        static member convert =
+            function
+            | Auto -> box "auto"
+            | Value v -> box v
+            | Array a -> box a
+
+
+        member this.Convert() = this |> BackOff.convert
+
 
     [<RequireQualifiedAccess>]
     type BoxPoints =
@@ -281,6 +371,23 @@ module StyleParam =
             | False -> box false
 
         member this.Convert() = this |> BoxPoints.convert
+
+    /// <summary>
+    /// Sets the upper and lower bound for the boxes quartiles means box is drawn between Q1 and Q3 SD means the box is drawn between Mean +- Standard Deviation
+    /// </summary>
+    [<RequireQualifiedAccess>]
+    type BoxSizeMode =
+        | Quartiles
+        | SD
+
+        static member toString =
+            function
+            | Quartiles -> "quartiles"
+            | SD -> "sd"
+
+        static member convert = BoxSizeMode.toString >> box
+        override this.ToString() = this |> BoxSizeMode.toString
+        member this.Convert() = this |> BoxSizeMode.convert
 
 
 
@@ -364,8 +471,8 @@ module StyleParam =
         member this.Convert() = this |> BranchValues.convert
 
     //--------------------------
-// #C#
-//--------------------------
+    // #C#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type CategoryArrangement =
@@ -549,11 +656,11 @@ module StyleParam =
 
         static member convert =
             function
-            | RGB (r, g, b) -> [ r; g; b ] |> box
-            | RGBA (r, g, b, a) -> [ r; g; b; a ] |> box
-            | RGBA256 (i, d, k, m) -> [ i; d; k; m ] |> box
-            | HSL (h, s, l) -> [ h; s; l ] |> box
-            | HSLA (h, s, l, a) -> [ h; s; l; a ] |> box
+            | RGB(r, g, b) -> [ r; g; b ] |> box
+            | RGBA(r, g, b, a) -> [ r; g; b; a ] |> box
+            | RGBA256(i, d, k, m) -> [ i; d; k; m ] |> box
+            | HSL(h, s, l) -> [ h; s; l ] |> box
+            | HSLA(h, s, l, a) -> [ h; s; l; a ] |> box
 
         member this.Convert() = this |> ColorComponentBound.convert
 
@@ -711,7 +818,7 @@ module StyleParam =
 
         static member convert =
             function
-            | Custom (cScale) ->
+            | Custom(cScale) ->
                 if Seq.length cScale < 2 then
                     failwith
                         "Color scale did not contain enough values. At minimum, a mapping for the lowest (0.0) and highest (1.0) values are required"
@@ -892,10 +999,26 @@ module StyleParam =
 
 
     //--------------------------
-// #D#
-//--------------------------
+    // #D#
+    //--------------------------
 
-    /// Sets this figure's behavior when a user preforms a mouse 'drag' in the plot area. When set to 'zoom', a portion of the plot will be highlighted,
+    [<RequireQualifiedAccess>]
+    type DoubleClick =
+        | Reset
+        | Autosize
+        | ResetAutosize
+        | NoInteraction
+
+        static member convert =
+            function
+            | Reset -> box "reset"
+            | Autosize -> box "autosize"
+            | ResetAutosize -> box "reset+autosize"
+            | NoInteraction -> box false
+
+        member this.Convert() = this |> DoubleClick.convert
+
+    /// Sets this figure's behavior when a user performs a mouse 'drag' in the plot area. When set to 'zoom', a portion of the plot will be highlighted,
     /// when the viewer exits the drag, this highlighted section will be zoomed in on. When set to 'pan', data in the plot will move along with the viewers
     /// dragging motions. A user can always depress the 'shift' key to access the whatever functionality has not been set as the default. In 3D plots, the
     /// default drag mode is 'rotate' which rotates the scene.
@@ -930,6 +1053,25 @@ module StyleParam =
             | False -> box false
 
         member this.Convert() = this |> DragMode.convert
+
+    [<RequireQualifiedAccess>]
+    type DrawDirection =
+        | Ortho
+        | Horizontal
+        | Vertical
+        | Diagonal
+
+        static member toString =
+            function
+            | Ortho -> "ortho"
+            | Horizontal -> "horizontal"
+            | Vertical -> "vertical"
+            | Diagonal -> "diagonal"
+
+        static member convert = DrawDirection.toString >> box
+        override this.ToString() = this |> DrawDirection.toString
+        member this.Convert() = this |> DrawDirection.convert
+
 
     /// Sets the Delaunay axis, which is the axis that is perpendicular to the surface of the Delaunay triangulation.
     /// It has an effect if `i`, `j`, `k` are not provided and `alphahull` is set to indicate Delaunay triangulation.
@@ -973,22 +1115,41 @@ module StyleParam =
         | Dash
         | Dot
         | DashDot
-        | User of int
+        | LongDash
+        | LongDashDot
+        | User of seq<int>
         static member toString =
             function
             | Solid -> "solid"
             | Dash -> "dash"
             | Dot -> "dot"
             | DashDot -> "dashdot"
-            | User px -> px.ToString()
+            | LongDash -> "longdash"
+            | LongDashDot -> "longdashdot"
+            | User px -> px |> Seq.map (fun px -> $"{px}px") |> String.concat ","
 
         static member convert = DrawingStyle.toString >> box
         override this.ToString() = this |> DrawingStyle.toString
         member this.Convert() = this |> DrawingStyle.convert
 
     //--------------------------
-// #E#
-//--------------------------
+    // #E#
+    //--------------------------
+
+    [<RequireQualifiedAccess>]
+    type EntryWidthMode =
+        | Fraction
+        | Pixels
+
+        static member toString =
+            function
+            | Fraction -> "fraction"
+            | Pixels -> "pixels"
+
+
+        static member convert = EntryWidthMode.toString >> box
+        override this.ToString() = this |> EntryWidthMode.toString
+        member this.Convert() = this |> EntryWidthMode.convert
 
     [<RequireQualifiedAccess>]
     type ErrorType =
@@ -1036,8 +1197,8 @@ module StyleParam =
         member this.Convert() = this |> ExponentFormat.convert
 
     //--------------------------
-// #F#
-//--------------------------
+    // #F#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type FunnelMode =
@@ -1121,9 +1282,23 @@ module StyleParam =
         override this.ToString() = this |> Fill.toString
         member this.Convert() = this |> Fill.convert
 
+    [<RequireQualifiedAccess>]
+    type FillRule =
+        | EvenOdd
+        | NonZero
+
+        static member toString =
+            function
+            | EvenOdd -> "evenodd"
+            | NonZero -> "nonzero"
+
+        static member convert = FillRule.toString >> box
+        override this.ToString() = this |> FillRule.toString
+        member this.Convert() = this |> FillRule.convert
+
     //--------------------------
-// #G#
-//--------------------------
+    // #G#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type GradientType =
@@ -1216,53 +1391,177 @@ module StyleParam =
 
     [<RequireQualifiedAccess>]
     type GeoProjectionType =
-        | EquiRectangular
-        | Mercator
-        | Orthographic
-        | NaturalEarth
-        | Kavrayskiy7
-        | Miller
-        | Robinson
-        | Eckert4
-        | AzimuthalEqualArea
-        | AzimuthalEquidistant
-        | ConicEqualArea
-        | ConicConformal
-        | ConicEquidistant
-        | Gnomonic
-        | Stereographic
-        | Mollweide
-        | Hammer
-        | TransverseMercator
-        | AlbersUSA
-        | WinkelTripel
-        | Aitoff
-        | Sinusoidal
+        | Airy                      
+        | Aitoff                    
+        | Albers                    
+        | AlbersUSA                 
+        | August                    
+        | AzimuthalEqualArea        
+        | AzimuthalEquidistant      
+        | Baker                     
+        | Bertin1953                
+        | Boggs                     
+        | Bonne                     
+        | Bottomley                 
+        | Bromley                   
+        | Collignon                 
+        | ConicConformal            
+        | ConicEqualArea            
+        | ConicEquidistant          
+        | Craig                     
+        | Craster                   
+        | CylindricalEqualArea      
+        | CylindricalStereographic  
+        | Eckert1                   
+        | Eckert2                   
+        | Eckert3                   
+        | Eckert4                   
+        | Eckert5                   
+        | Eckert6                   
+        | Eisenlohr                 
+        | EqualEarth                
+        | Equirectangular           
+        | Fahey                     
+        | Foucaut                   
+        | FoucautSinusoidal         
+        | Ginzburg4                 
+        | Ginzburg5                 
+        | Ginzburg6                 
+        | Ginzburg8                 
+        | Ginzburg9                 
+        | Gnomonic                  
+        | Gringorten                
+        | GringortenQuincuncial     
+        | Guyou                     
+        | Hammer                    
+        | Hill                      
+        | Homolosine                
+        | Hufnagel                  
+        | Hyperelliptical           
+        | Kavrayskiy7               
+        | Lagrange                  
+        | Larrivee                  
+        | Laskowski                 
+        | Loximuthal                
+        | Mercator                  
+        | Miller                    
+        | Mollweide                 
+        | MtFlatPolarParabolic      
+        | MtFlatPolarQuartic        
+        | MtFlatPolarSinusoidal     
+        | NaturalEarth              
+        | NaturalEarth1             
+        | NaturalEarth2             
+        | NellHammer                
+        | Nicolosi                  
+        | Orthographic              
+        | Patterson                 
+        | PeirceQuincuncial         
+        | Polyconic                 
+        | RectangularPolyconic      
+        | Robinson                  
+        | Satellite                 
+        | SinuMollweide             
+        | Sinusoidal                
+        | Stereographic             
+        | Times                     
+        | TransverseMercator        
+        | VanDerGrinten             
+        | VanDerGrinten2            
+        | VanDerGrinten3            
+        | VanDerGrinten4            
+        | Wagner4                   
+        | Wagner6                   
+        | Wiechel                   
+        | WinkelTripel              
+        | Winkel3                   
 
         static member toString =
             function
-            | EquiRectangular -> "equirectangular"
-            | Mercator -> "mercator"
-            | Orthographic -> "orthographic"
-            | NaturalEarth -> "natural earth"
-            | Kavrayskiy7 -> "kavrayskiy7"
-            | Miller -> "miller"
-            | Robinson -> "robinson"
-            | Eckert4 -> "eckert4"
-            | AzimuthalEqualArea -> "azimuthal equal area"
-            | AzimuthalEquidistant -> "azimuthal equidistant"
-            | ConicEqualArea -> "conic equal area"
-            | ConicConformal -> "conic conformal"
-            | ConicEquidistant -> "conic equidistant"
-            | Gnomonic -> "gnomonic"
-            | Stereographic -> "stereographic"
-            | Mollweide -> "mollweide"
-            | Hammer -> "hammer"
-            | TransverseMercator -> "transverse mercator"
-            | AlbersUSA -> "albers usa"
-            | WinkelTripel -> "winkel tripel"
-            | Aitoff -> "aitoff"
-            | Sinusoidal -> "sinusoidal"
+                | Airy                      -> "airy" 
+                | Aitoff                    -> "aitoff" 
+                | Albers                    -> "albers" 
+                | AlbersUSA                 -> "albers usa" 
+                | August                    -> "august" 
+                | AzimuthalEqualArea        -> "azimuthal equal area" 
+                | AzimuthalEquidistant      -> "azimuthal equidistant" 
+                | Baker                     -> "baker" 
+                | Bertin1953                -> "bertin1953" 
+                | Boggs                     -> "boggs" 
+                | Bonne                     -> "bonne" 
+                | Bottomley                 -> "bottomley" 
+                | Bromley                   -> "bromley" 
+                | Collignon                 -> "collignon" 
+                | ConicConformal            -> "conic conformal" 
+                | ConicEqualArea            -> "conic equal area" 
+                | ConicEquidistant          -> "conic equidistant" 
+                | Craig                     -> "craig" 
+                | Craster                   -> "craster" 
+                | CylindricalEqualArea      -> "cylindrical equal area" 
+                | CylindricalStereographic  -> "cylindrical stereographic"
+                | Eckert1                   -> "eckert1" 
+                | Eckert2                   -> "eckert2" 
+                | Eckert3                   -> "eckert3" 
+                | Eckert4                   -> "eckert4" 
+                | Eckert5                   -> "eckert5" 
+                | Eckert6                   -> "eckert6" 
+                | Eisenlohr                 -> "eisenlohr" 
+                | EqualEarth                -> "equal earth" 
+                | Equirectangular           -> "equirectangular" 
+                | Fahey                     -> "fahey" 
+                | Foucaut                   -> "foucaut" 
+                | FoucautSinusoidal         -> "foucaut sinusoidal" 
+                | Ginzburg4                 -> "ginzburg4" 
+                | Ginzburg5                 -> "ginzburg5" 
+                | Ginzburg6                 -> "ginzburg6" 
+                | Ginzburg8                 -> "ginzburg8"
+                | Ginzburg9                 -> "ginzburg9" 
+                | Gnomonic                  -> "gnomonic" 
+                | Gringorten                -> "gringorten"
+                | GringortenQuincuncial     -> "gringorten quincuncial" 
+                | Guyou                     -> "guyou" 
+                | Hammer                    -> "hammer" 
+                | Hill                      -> "hill" 
+                | Homolosine                -> "homolosine" 
+                | Hufnagel                  -> "hufnagel" 
+                | Hyperelliptical           -> "hyperelliptical" 
+                | Kavrayskiy7               -> "kavrayskiy7" 
+                | Lagrange                  -> "lagrange" 
+                | Larrivee                  -> "larrivee" 
+                | Laskowski                 -> "laskowski" 
+                | Loximuthal                -> "loximuthal" 
+                | Mercator                  -> "mercator" 
+                | Miller                    -> "miller" 
+                | Mollweide                 -> "mollweide" 
+                | MtFlatPolarParabolic      -> "mt flat polar parabolic" 
+                | MtFlatPolarQuartic        -> "mt flat polar quartic" 
+                | MtFlatPolarSinusoidal     -> "mt flat polar sinusoidal" 
+                | NaturalEarth              -> "natural earth" 
+                | NaturalEarth1             -> "natural earth1" 
+                | NaturalEarth2             -> "natural earth2" 
+                | NellHammer                -> "nell hammer" 
+                | Nicolosi                  -> "nicolosi" 
+                | Orthographic              -> "orthographic" 
+                | Patterson                 -> "patterson" 
+                | PeirceQuincuncial         -> "peirce quincuncial" 
+                | Polyconic                 -> "polyconic" 
+                | RectangularPolyconic      -> "rectangular polyconic" 
+                | Robinson                  -> "robinson" 
+                | Satellite                 -> "satellite" 
+                | SinuMollweide             -> "sinu mollweide" 
+                | Sinusoidal                -> "sinusoidal" 
+                | Stereographic             -> "stereographic" 
+                | Times                     -> "times" 
+                | TransverseMercator        -> "transverse mercator" 
+                | VanDerGrinten             -> "van der grinten" 
+                | VanDerGrinten2            -> "van der grinten2" 
+                | VanDerGrinten3            -> "van der grinten3" 
+                | VanDerGrinten4            -> "van der grinten4" 
+                | Wagner4                   -> "wagner4" 
+                | Wagner6                   -> "wagner6"
+                | Wiechel                   -> "wiechel" 
+                | WinkelTripel              -> "winkel tripel"
+                | Winkel3                   -> "winkel3"
 
         static member convert =
             GeoProjectionType.toString >> box
@@ -1271,18 +1570,20 @@ module StyleParam =
         member this.Convert() = this |> GeoProjectionType.convert
 
     //--------------------------
-// #H#
-//--------------------------
+    // #H#
+    //--------------------------
 
+    [<RequireQualifiedAccess>]
     type HoverInfo =
         | X
         | XY
         | XYZ
         | XYZText
+        | XYZTextName
         | Y
         | YZ
         | YZText
-        | YZTextNames
+        | YZTextName
         | Z
         | ZText
         | ZTextName
@@ -1290,6 +1591,8 @@ module StyleParam =
         | TextName
         | Name
         | All
+        | None
+        | Skip
 
         static member toString =
             function
@@ -1297,10 +1600,11 @@ module StyleParam =
             | XY -> "x+y"
             | XYZ -> "x+y+z"
             | XYZText -> "x+y+z+text"
+            | XYZTextName -> "x+y+z+text+name"
             | Y -> "y"
             | YZ -> "y+z"
             | YZText -> "y+z+text"
-            | YZTextNames -> "y+z+text+name"
+            | YZTextName -> "y+z+text+name"
             | Z -> "z"
             | ZText -> "z+text"
             | ZTextName -> "z+text+name"
@@ -1308,6 +1612,8 @@ module StyleParam =
             | TextName -> "text+name"
             | Name -> "name"
             | All -> "all"
+            | None -> "none"
+            | Skip -> "skip"
 
         static member convert = HoverInfo.toString >> box
         override this.ToString() = this |> HoverInfo.toString
@@ -1424,8 +1730,8 @@ module StyleParam =
         member this.Convert() = this |> HorizontalAlign.convert
 
     //--------------------------
-// #I#
-//--------------------------
+    // #I#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type IcicleCount =
@@ -1584,18 +1890,18 @@ module StyleParam =
 
 
     //--------------------------
-// #J#
+    // #J#
 
     [<RequireQualifiedAccess>]
     type JitterPoints = BoxPoints
 
     //--------------------------
-// #K#
-//--------------------------
+    // #K#
+    //--------------------------
 
     //--------------------------
-// #L#
-//--------------------------
+    // #L#
+    //--------------------------
 
 
     /// Specifies whether shapes are drawn below or above traces. Default is Above
@@ -1656,7 +1962,7 @@ module StyleParam =
         member this.Convert() = this |> LocationFormat.convert
 
 
-    /// Determines wether the rows of a LayoutGrid are enumerated from the top or the bottom.
+    /// Determines whether the rows of a LayoutGrid are enumerated from the top or the bottom.
     [<RequireQualifiedAccess>]
     type LayoutGridRowOrder =
         | TopToBottom
@@ -1776,8 +2082,8 @@ module StyleParam =
         member this.Convert() = this |> YAnchorPosition.convert
 
     //--------------------------
-// #M#
-//--------------------------
+    // #M#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type Method =
@@ -2154,12 +2460,28 @@ module StyleParam =
         member this.Convert() = this |> MarkerSizeMode.convert
 
     //--------------------------
-// #N#
-//--------------------------
+    // #N#
+    //--------------------------
+
+    [<RequireQualifiedAccess>]
+    type NewSelectionMode =
+        | Immediate
+        | Gradual
+
+        static member toString =
+            function
+            | Immediate -> "immediate"
+            | Gradual -> "gradual"
+
+        static member convert =
+            NewSelectionMode.toString >> box
+
+        override this.ToString() = this |> NewSelectionMode.toString
+        member this.Convert() = this |> NewSelectionMode.convert
 
     //--------------------------
-// #O#
-//--------------------------
+    // #O#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type Orientation =
@@ -2176,8 +2498,8 @@ module StyleParam =
         member this.Convert() = this |> Orientation.convert
 
     //--------------------------
-// #P#
-//--------------------------
+    // #P#
+    //--------------------------
 
 
     [<RequireQualifiedAccess>]
@@ -2258,8 +2580,8 @@ module StyleParam =
         member this.Convert() = this |> PolarGridShape.convert
 
     //--------------------------
-// #Q#
-//--------------------------
+    // #Q#
+    //--------------------------
 
     /// Sets the method used to compute the sample's Q1 and Q3 quartiles
     [<RequireQualifiedAccess>]
@@ -2280,8 +2602,8 @@ module StyleParam =
 
 
     //--------------------------
-// #R#
-//--------------------------
+    // #R#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type RangesliderRangeMode =
@@ -2333,7 +2655,7 @@ module StyleParam =
 
         static member convert =
             function
-            | MinMax (min, max) -> box [| min; max |]
+            | MinMax(min, max) -> box [| min; max |]
             | Values arr -> box arr
 
         member this.Convert() = this |> Range.convert
@@ -2359,8 +2681,70 @@ module StyleParam =
 
 
     //--------------------------
-// #S#
-//--------------------------
+    // #S#
+    //--------------------------
+
+    [<RequireQualifiedAccess>]
+    type ScaleAnchor =
+        | False
+        | X of int
+        | Y of int
+
+        static member convert =
+            function
+            | False -> box false
+            | X id -> (if id < 2 then "x" else sprintf "x%i" id) |> box
+            | Y id -> (if id < 2 then "y" else sprintf "y%i" id) |> box
+
+        member this.Convert() = this |> ScaleAnchor.convert
+
+    [<RequireQualifiedAccess>]
+    type ScrollZoom =
+        | Cartesian
+        | GL3D
+        | Geo
+        | Mapbox
+        | All
+        | NoZoom
+
+        static member convert =
+            function
+            | Cartesian -> box "cartesian"
+            | GL3D -> box "gl3d"
+            | Geo -> box "geo"
+            | Mapbox -> box "mapbox"
+            | All -> box true
+            | NoZoom -> box false
+
+        member this.Convert() = this |> ScrollZoom.convert
+
+    [<RequireQualifiedAccess>]
+    type ScatterMode =
+        | Group
+        | Overlay
+
+        static member toString =
+            function
+            | Group -> "group"
+            | Overlay -> "overlay"
+
+        static member convert = ScatterMode.toString >> box
+        override this.ToString() = this |> ScatterMode.toString
+        member this.Convert() = this |> ScatterMode.convert
+
+    [<RequireQualifiedAccess>]
+    type ShapeSizeMode =
+        | Scaled
+        | Pixel
+
+        static member toString =
+            function
+            | Scaled -> "scaled"
+            | Pixel -> "pixel"
+
+        static member convert = ShapeSizeMode.toString >> box
+        override this.ToString() = this |> ShapeSizeMode.toString
+        member this.Convert() = this |> ShapeSizeMode.convert
 
     [<RequireQualifiedAccess>]
     type SortAlgorithm =
@@ -2463,6 +2847,20 @@ module StyleParam =
         static member convert = ShapeType.toString >> box
         override this.ToString() = this |> ShapeType.toString
         member this.Convert() = this |> ShapeType.convert
+
+    [<RequireQualifiedAccess>]
+    type SelectionType =
+        | Rectangle
+        | SvgPath
+
+        static member toString =
+            function
+            | Rectangle -> "rect"
+            | SvgPath -> "path"
+
+        static member convert = SelectionType.toString >> box
+        override this.ToString() = this |> SelectionType.toString
+        member this.Convert() = this |> SelectionType.convert
 
     [<RequireQualifiedAccess>]
     type SymbolStyle =
@@ -2569,10 +2967,12 @@ module StyleParam =
         | ArrowBarDown
         | ArrowBarLeft
         | ArrowBarRight
+        | Arrow
+        | ArrowWide
 
         static member toInteger =
             function
-            | Modified (symbol, modifier) -> (symbol |> MarkerSymbol.toInteger) + SymbolStyle.toModifier modifier
+            | Modified(symbol, modifier) -> (symbol |> MarkerSymbol.toInteger) + SymbolStyle.toModifier modifier
             | Circle -> 0
             | Square -> 1
             | Diamond -> 2
@@ -2626,6 +3026,8 @@ module StyleParam =
             | ArrowBarDown -> 50
             | ArrowBarLeft -> 51
             | ArrowBarRight -> 52
+            | Arrow -> 53
+            | ArrowWide -> 54
 
         static member convert =
             MarkerSymbol.toInteger >> string >> box
@@ -2704,6 +3106,8 @@ module StyleParam =
     type Side =
         | Top
         | TopLeft
+        | TopCenter
+        | TopRight
         | Bottom
         | Left
         | Right
@@ -2712,6 +3116,8 @@ module StyleParam =
             function
             | Top -> "top"
             | TopLeft -> "top left"
+            | TopCenter -> "top center"
+            | TopRight -> "top right"
             | Bottom -> "bottom"
             | Left -> "left"
             | Right -> "right"
@@ -2869,8 +3275,19 @@ module StyleParam =
 
 
     //--------------------------
-// #T#
-//--------------------------
+    // #T#
+    //--------------------------
+    [<RequireQualifiedAccess>]
+    type TextAngle =
+        | Auto
+        | Degrees of float
+
+        static member convert =
+            function
+            | Auto -> box "auto"
+            | Degrees d -> box d
+
+        member this.Convert() = this |> TextAngle.convert
 
     [<RequireQualifiedAccess>]
     type TriangulationAlgorithm =
@@ -3045,7 +3462,7 @@ module StyleParam =
         override this.ToString() = this |> TextPosition.toString
         member this.Convert() = this |> TextPosition.convert
 
-    /// Determines which trace information appear on the graph and  on hove (HoverInfo)
+    /// Determines which trace information appear on the graph and on hover (HoverInfo)
     //Any combination of "label", "text", "value", "percent" joined with a "+" OR "none".
     //examples: "label", "text", "label+text", "label+text+value", "none"
     [<RequireQualifiedAccess>]
@@ -3073,19 +3490,20 @@ module StyleParam =
         static member toConcatString(o: seq<TextInfo>) =
             o |> Seq.map TextInfo.toString |> String.concat "+"
 
-    /// Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided).
-    /// If "array", the placement of the ticks is set via `tickvals` and the tick text is `ticktext`. ("array" is the default value if `tickvals` is provided).
+    /// Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `tickvals` and the tick text is `ticktext`. ("array" is the default value if `tickvals` is provided). If "sync", the number of ticks will sync with the overlayed axis set by `overlaying` property.
     [<RequireQualifiedAccess>]
     type TickMode =
         | Auto
         | Linear
         | Array
+        | Sync
 
         static member toString =
             function
             | Auto -> "auto"
             | Linear -> "linear"
             | Array -> "array"
+            | Sync -> "sync"
 
         static member convert = TickMode.toString >> box
         override this.ToString() = this |> TickMode.toString
@@ -3321,8 +3739,8 @@ module StyleParam =
 
 
     //--------------------------
-// #U#
-//--------------------------
+    // #U#
+    //--------------------------
     [<RequireQualifiedAccess>]
     type UpdateMenuType =
         | Dropdown
@@ -3393,8 +3811,8 @@ module StyleParam =
         member this.Convert() = this |> UniformTextMode.convert
 
     //--------------------------
-// #V#
-//--------------------------
+    // #V#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type ViolinSide =
@@ -3457,8 +3875,8 @@ module StyleParam =
         member this.Convert() = this |> VerticalAlign.convert
 
     //--------------------------
-// #W#
-//--------------------------
+    // #W#
+    //--------------------------
 
     [<RequireQualifiedAccess>]
     type WaterfallMode =

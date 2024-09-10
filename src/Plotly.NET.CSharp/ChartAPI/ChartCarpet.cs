@@ -45,7 +45,7 @@ namespace Plotly.NET.CSharp
         /// <param name="Color">Sets default for all colors associated with this axis all at once: line, font, tick, and grid colors. Grid color is lightened by blending this with the plot background Individual pieces can override this.</param>
         /// <param name="CheaterSlope">The shift applied to each successive row of data in creating a cheater plot. Only used if `x` is been omitted.</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart Carpet<XType, MultiXType, YType, MultiYType, AType, BType>(
+        public static GenericChart Carpet<XType, MultiXType, YType, MultiYType, AType, BType>(
             string carpetId,
             Optional<string> Name = default,
             Optional<bool> ShowLegend = default,
@@ -96,7 +96,7 @@ namespace Plotly.NET.CSharp
         ///
         /// In general, ScatterCarpet creates a plot that uses the given carpet identifier as coordinate system.
         ///
-        /// Wether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
+        /// Whether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
         ///
         /// ScatterCarpet charts are the basis of PointCarpet, LineCarpet, and BubbleCarpet Charts, and can be customized as such. We also provide abstractions for those: Chart.LineCarpet, Chart.PointCarpet, Chart.BubbleCarpet
         /// </summary>
@@ -124,7 +124,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart ScatterCarpet<AType, BType, TextType>(
+        public static GenericChart ScatterCarpet<AType, BType, TextType>(
             IEnumerable<AType> a,
             IEnumerable<BType> b,
             StyleParam.Mode mode,
@@ -186,7 +186,7 @@ namespace Plotly.NET.CSharp
         ///
         /// In general, PointCarpet creates a point plot that uses the given carpet identifier as coordinate system.
         ///
-        /// Wether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
+        /// Whether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
         /// </summary>
         /// <param name="a">Sets the a-axis coordinates on the carpet.</param>
         /// <param name="b">Sets the b-axis coordinates on the carpet.</param>
@@ -206,7 +206,7 @@ namespace Plotly.NET.CSharp
         /// <param name="MultiMarkerSymbol">Sets the marker symbol for each individual datum</param>
         /// <param name="Marker">Sets the marker (use this for more finegrained control than the other marker-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart PointCarpet<AType, BType, TextType>(
+        public static GenericChart PointCarpet<AType, BType, TextType>(
             IEnumerable<AType> a,
             IEnumerable<BType> b,
             string carpetAnchorId,
@@ -256,12 +256,12 @@ namespace Plotly.NET.CSharp
         ///
         /// In general, LineCarpet creates a line plot that uses the given carpet identifier as coordinate system.
         ///
-        /// Wether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
+        /// Whether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
         /// </summary>
         /// <param name="a">Sets the a-axis coordinates on the carpet.</param>
         /// <param name="b">Sets the b-axis coordinates on the carpet.</param>
         /// <param name="carpetAnchorId">The identifier of the carpet that this trace will lie on.</param>
-        /// <param name="ShowMarkers">Wether to show markers for the individual data points</param>
+        /// <param name="ShowMarkers">Whether to show markers for the individual data points</param>
         /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover</param>
         /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
         /// <param name="Opacity">Sets the opactity of the trace</param>
@@ -282,7 +282,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart LineCarpet<AType, BType, TextType>(
+        public static GenericChart LineCarpet<AType, BType, TextType>(
             IEnumerable<AType> a,
             IEnumerable<BType> b,
             string carpetAnchorId,
@@ -345,12 +345,12 @@ namespace Plotly.NET.CSharp
         /// In general, SplineCarpet creates a spline plot that uses the given carpet identifier as coordinate system.
         /// A spline chart is a line chart in which data points are connected by smoothed curves.
         ///
-        /// Wether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
+        /// Whether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
         /// </summary>
         /// <param name="a">Sets the a-axis coordinates on the carpet.</param>
         /// <param name="b">Sets the b-axis coordinates on the carpet.</param>
         /// <param name="carpetAnchorId">The identifier of the carpet that this trace will lie on.</param>
-        /// <param name="ShowMarkers">Wether to show markers for the individual data points</param>
+        /// <param name="ShowMarkers">Whether to show markers for the individual data points</param>
         /// <param name="Smoothing">Sets the amount of smoothing. "0" corresponds to no smoothing (equivalent to a "linear" shape).  Use values between 0. and 1.3</param>
         /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover</param>
         /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
@@ -372,7 +372,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart SplineCarpet<AType, BType, TextType>(
+        public static GenericChart SplineCarpet<AType, BType, TextType>(
             IEnumerable<AType> a,
             IEnumerable<BType> b,
             string carpetAnchorId,
@@ -438,7 +438,7 @@ namespace Plotly.NET.CSharp
         ///
         /// A bubble chart is a variation of the Point chart, where the data points get an additional scale by being rendered as bubbles of different sizes.
         ///
-        /// Wether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
+        /// Whether the resulting plot is a cheater or true carpet plot depends on the referenced carpet.
         /// </summary>
         /// <param name="a">Sets the a-axis coordinates on the carpet.</param>
         /// <param name="b">Sets the b-axis coordinates on the carpet.</param>
@@ -464,7 +464,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart BubbleCarpet<AType, BType, TextType>(
+        public static GenericChart BubbleCarpet<AType, BType, TextType>(
             IEnumerable<AType> a,
             IEnumerable<BType> b,
             IEnumerable<int> sizes,
@@ -551,7 +551,7 @@ namespace Plotly.NET.CSharp
         /// <param name="ContourLabelFont">Sets the font used for labeling the contour levels. The default color comes from the lines, if shown. The default family and size come from `layout.font`.</param>
         /// <param name="Contours">Sets the styles of the contours (use this for more finegrained control than the other contour-associated arguments).</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart ContourCarpet<ZType, AType, BType, TextType>(
+        public static GenericChart ContourCarpet<ZType, AType, BType, TextType>(
             IEnumerable<ZType> z,
             string carpetAnchorId,
             Optional<string> Name = default,

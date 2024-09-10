@@ -18,7 +18,7 @@ type Trace(traceTypeName: string) =
     member val ``type`` = traceTypeName with get, set
 
     /// <summary>
-    /// Returns Some(dynamic member value) of the trace object's underlying DynamicObj when a dynamic member eith the given name exists, and None otherwise.
+    /// Returns Some(dynamic member value) of the trace object's underlying DynamicObj when a dynamic member with the given name exists, and None otherwise.
     /// </summary>
     /// <param name="propName">The name of the dynamic member to get the value of</param>
     /// <param name="trace">The trace to get the dynamic member value from</param>
@@ -196,6 +196,33 @@ type Trace(traceTypeName: string) =
             trace.SetValue("coloraxis", StyleParam.SubPlotId.convert id)
             trace)
 
+     /// <summary>
+    /// Returns the Legend anchor of the given trace.
+    ///
+    /// If there is no Legend set, returns "legend".
+    /// </summary>
+    /// <param name="trace">The trace to get the Legend anchor from</param>
+    static member getLegendAnchor(trace: #Trace) =
+        let idString =
+            trace |> Trace.tryGetTypedMember<string> ("legend") |> Option.defaultValue "legend"
+
+        if idString = "legend" then
+            StyleParam.SubPlotId.Legend 1
+        else
+            StyleParam.SubPlotId.Legend(idString.Replace("legend", "") |> int)
+
+    /// <summary>
+    /// Returns a function that sets the Legend anchor of the given trace.
+    /// </summary>
+    /// <param name="legendId">The new Legend anchor</param>
+    static member setLegendAnchor(legendId: int) =
+        let id =
+            StyleParam.SubPlotId.Legend legendId
+
+        (fun (trace: #Trace) ->
+            trace.SetValue("legend", StyleParam.SubPlotId.convert id)
+            trace)
+
     /// <summary>
     /// Returns the domain of the given trace.
     ///
@@ -286,7 +313,7 @@ type TraceStyle() =
     /// Sets trace information on the given trace.
     /// </summary>
     /// <param name="Name">Sets the name of the chart's trace(s). When the chart is a multichart (it contains multiple traces), the name is suffixed by '_%i' where %i is the index of the trace.</param>
-    /// <param name="Visible">Wether or not the chart's traces are visible</param>
+    /// <param name="Visible">Whether or not the chart's traces are visible</param>
     /// <param name="ShowLegend">Determines whether or not item(s) corresponding to this chart's trace(s) is/are shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for the chart's trace(s). Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for the chart's trace(s). Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -314,6 +341,8 @@ type TraceStyle() =
     /// <summary>
     /// Returns a function that applies the given styles to the trace's marker object. Overwrites attributes with the same name that are already set.
     /// </summary>
+    /// <param name="Angle">Sets the marker angle in respect to `angleref`.</param>
+    /// <param name="AngleRef">Sets the reference for marker angle. With "previous", angle 0 points along the line from the previous point to this one. With "up", angle 0 points toward the top of the screen.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `marker.colorscale`. Has an effect only if in `marker.color`is set to a numerical array. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="CAuto">Determines whether or not the color domain is computed with respect to the input data (here in `marker.color`) or the bounds set in `marker.cmin` and `marker.cmax` Has an effect only if in `marker.color`is set to a numerical array. Defaults to `false` when `marker.cmin` and `marker.cmax` are set by the user.</param>
     /// <param name="CMax">Sets the upper bound of the color domain. Has an effect only if in `marker.color`is set to a numerical array. Value should have the same units as in `marker.color` and if set, `marker.cmin` must be set as well.</param>
@@ -323,7 +352,8 @@ type TraceStyle() =
     /// <param name="Colors">Sets the color of each sector. If not specified, the default trace color set is used to pick the sector colors.</param>
     /// <param name="ColorAxis">Sets a reference to a shared color axis. References to these shared color axes are "coloraxis", "coloraxis2", "coloraxis3", etc. Settings for these shared color axes are set in the layout, under `layout.coloraxis`, `layout.coloraxis2`, etc. Note that multiple color scales can be linked to the same color axis.</param>
     /// <param name="ColorBar">Sets the marker's color bar.</param>
-    /// <param name="Colorscale"></param>
+    /// <param name="Colorscale">Sets the colorscale. Has an effect only if colors is set to a numerical array. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use `marker.cmin` and `marker.cmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
+    /// <param name="CornerRadius">Sets the maximum rounding of corners (in px).</param>
     /// <param name="Gradient">Sets the marker's gradient</param>
     /// <param name="Outline">Sets the marker's outline.</param>
     /// <param name="Opacity">Sets the marker opacity.</param>
@@ -337,6 +367,8 @@ type TraceStyle() =
     /// <param name="SizeMin">Has an effect only if `marker.size` is set to a numerical array. Sets the minimum size (in px) of the rendered marker points.</param>
     /// <param name="SizeMode">Has an effect only if `marker.size` is set to a numerical array. Sets the rule for which the data in `size` is converted to pixels.</param>
     /// <param name="SizeRef">Has an effect only if `marker.size` is set to a numerical array. Sets the scale factor used to determine the rendered size of marker points. Use with `sizemin` and `sizemode`.</param>
+    /// <param name="StandOff">Moves the marker away from the data point in the direction of `angle` (in px). This can be useful for example if you have another marker at this location and you want to point an arrowhead marker at it.</param>
+    /// <param name="MultiStandOff">Moves the marker away from the data point in the direction of `angle` (in px). This can be useful for example if you have another marker at this location and you want to point an arrowhead marker at it.</param>
     /// <param name="Symbol">Sets the marker symbol.</param>
     /// <param name="MultiSymbol">Sets the individual marker symbols.</param>
     /// <param name="Symbol3D">Sets the marker symbol for 3d traces.</param>
@@ -345,6 +377,8 @@ type TraceStyle() =
     /// <param name="OutlierWidth">Sets the width of the outlier sample points.</param>
     static member Marker
         (
+            [<Optional; DefaultParameterValue(null)>] ?Angle: float,
+            [<Optional; DefaultParameterValue(null)>] ?AngleRef: StyleParam.AngleRef,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?CAuto: bool,
             [<Optional; DefaultParameterValue(null)>] ?CMax: float,
@@ -355,6 +389,7 @@ type TraceStyle() =
             [<Optional; DefaultParameterValue(null)>] ?ColorAxis: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?Colorscale: StyleParam.Colorscale,
+            [<Optional; DefaultParameterValue(null)>] ?CornerRadius: int,
             [<Optional; DefaultParameterValue(null)>] ?Gradient: Gradient,
             [<Optional; DefaultParameterValue(null)>] ?Outline: Line,
             [<Optional; DefaultParameterValue(null)>] ?MaxDisplayed: int,
@@ -368,6 +403,8 @@ type TraceStyle() =
             [<Optional; DefaultParameterValue(null)>] ?SizeMin: int,
             [<Optional; DefaultParameterValue(null)>] ?SizeMode: StyleParam.MarkerSizeMode,
             [<Optional; DefaultParameterValue(null)>] ?SizeRef: int,
+            [<Optional; DefaultParameterValue(null)>] ?StandOff: float,
+            [<Optional; DefaultParameterValue(null)>] ?MultiStandOff: seq<float>,
             [<Optional; DefaultParameterValue(null)>] ?Symbol: StyleParam.MarkerSymbol,
             [<Optional; DefaultParameterValue(null)>] ?MultiSymbol: seq<StyleParam.MarkerSymbol>,
             [<Optional; DefaultParameterValue(null)>] ?Symbol3D: StyleParam.MarkerSymbol3D,
@@ -380,6 +417,8 @@ type TraceStyle() =
                 trace
                 |> Trace.getMarker
                 |> Marker.style (
+                    ?Angle = Angle,
+                    ?AngleRef = AngleRef,
                     ?AutoColorScale = AutoColorScale,
                     ?CAuto = CAuto,
                     ?CMax = CMax,
@@ -390,6 +429,7 @@ type TraceStyle() =
                     ?ColorAxis = ColorAxis,
                     ?ColorBar = ColorBar,
                     ?Colorscale = Colorscale,
+                    ?CornerRadius = CornerRadius,
                     ?Gradient = Gradient,
                     ?Outline = Outline,
                     ?Size = Size,
@@ -408,7 +448,9 @@ type TraceStyle() =
                     ?ShowScale = ShowScale,
                     ?SizeMin = SizeMin,
                     ?SizeMode = SizeMode,
-                    ?SizeRef = SizeRef
+                    ?SizeRef = SizeRef,
+                    ?StandOff = StandOff,
+                    ?MultiStandOff = MultiStandOff
                 )
 
             trace |> Trace.setMarker (marker))
@@ -416,6 +458,7 @@ type TraceStyle() =
     /// <summary>
     /// Returns a function that applies the given styles to the trace's line object. Overwrites attributes with the same name that are already set.
     /// </summary>
+    /// <param name="BackOff">Sets the line back off from the end point of the nth line segment (in px). This option is useful e.g. to avoid overlap with arrowhead markers. With "auto" the lines would trim before markers if `marker.angleref` is set to "previous".</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `line.colorscale`. Has an effect only if in `line.color`is set to a numerical array. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="CAuto">Determines whether or not the color domain is computed with respect to the input data (here in `line.color`) or the bounds set in `line.cmin` and `line.cmax` Has an effect only if in `line.color`is set to a numerical array. Defaults to `false` when `line.cmin` and `line.cmax` are set by the user.</param>
     /// <param name="CMax">Sets the upper bound of the color domain. Has an effect only if in `line.color`is set to a numerical array. Value should have the same units as in `line.color` and if set, `line.cmin` must be set as well.</param>
@@ -425,7 +468,7 @@ type TraceStyle() =
     /// <param name="ColorAxis">Sets a reference to a shared color axis. References to these shared color axes are "coloraxis", "coloraxis2", "coloraxis3", etc. Settings for these shared color axes are set in the layout, under `layout.coloraxis`, `layout.coloraxis2`, etc. Note that multiple color scales can be linked to the same color axis.</param>
     /// <param name="Colorscale">Sets the line colorscale</param>
     /// <param name="ReverseScale">Reverses the color mapping if true.</param>
-    /// <param name="ShowScale">Wether or not to show the color bar</param>
+    /// <param name="ShowScale">Whether or not to show the color bar</param>
     /// <param name="ColorBar">Sets the colorbar.</param>
     /// <param name="Dash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="Shape">Determines the line shape. With "spline" the lines are drawn using spline interpolation. The other available values correspond to step-wise line shapes.</param>
@@ -437,6 +480,7 @@ type TraceStyle() =
     /// <param name="OutlierWidth">Sets the width of the outline of outliers</param>
     static member Line
         (
+            [<Optional; DefaultParameterValue(null)>] ?BackOff: StyleParam.BackOff,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?CAuto: bool,
             [<Optional; DefaultParameterValue(null)>] ?CMax: float,
@@ -462,6 +506,7 @@ type TraceStyle() =
                 trace
                 |> Trace.getLine
                 |> Line.style (
+                    ?BackOff = BackOff,
                     ?AutoColorScale = AutoColorScale,
                     ?CAuto = CAuto,
                     ?CMax = CMax,
@@ -656,8 +701,8 @@ type TraceStyle() =
     static member Selection
         (
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection
         ) =
         (fun (trace: ('T :> Trace)) ->
 

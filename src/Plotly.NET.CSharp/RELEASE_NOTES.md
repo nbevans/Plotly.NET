@@ -1,3 +1,29 @@
+### 0.13.0 - September 04 2024
+
+- [Add C# wrapper for Chart.SingleStack](https://github.com/plotly/Plotly.NET/pull/467) thanks [@TheKiiiing](https://github.com/TheKiiiing)!
+
+### 0.12.0 - May 27 2024
+
+- bump version range of Plotly.NET to [5.0.0, 6.0.0)
+- Reflect relevant API changes in Plotly.NET 5.0.0 (e.g. in Chart.Grid)
+
+### 0.11.1 - July 25 2023
+
+- bump version range of Plotly.NET to [4.1.0, 5.0.0)
+
+### 0.11.0 - July 14 2023
+
+- BREAKING: [Fix a typo in `WithMapbox` and `WithMapboxStyle`method names](https://github.com/plotly/Plotly.NET/commit/963921c68787e1368ebf79b41810024ec77c0006), thanks [hdavid333](https://github.com/hdavid333)!
+
+### 0.10.0 - March 21 2023
+
+- Add WithLegend and WithLegendStyle extension methods to GenericChart
+
+### 0.9.0 - March 21 2023
+
+- Update package to work with Plotly.NET 4.0
+- use strict dependency range to prevent major version increases from Plotly.NET from breaking dependent packages.
+
 ### 0.8.0 - August 23 2022
 
 completed C# bindings for the missing domain and smith charts:
@@ -124,8 +150,8 @@ added C# bindings for statistical charts
 Optional arguments are now wrapped in a custom `Optional<T>` type to allow usage of both reference and value types for optional arguments across the whole API.
 
 Some GenericChart extension methods were also added:
-- WithMabox
-- WithMaboxStyle
+- WithMapbox
+- WithMapboxStyle
 
 ### 0.0.1 - June 15 2022
 

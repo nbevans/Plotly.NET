@@ -3,6 +3,32 @@ module internal InternalUtils
 
 open DynamicObj
 open System.Runtime.InteropServices
+open System.IO
+open System.Reflection
+
+let combineOptSeqs (first: seq<'A> option) (second: seq<'A> option) =
+    match first, second with
+    | Some f, Some s -> Some(Seq.append f s)
+    | Some f, None -> Some f
+    | None, Some s -> Some s
+    | _ -> None
+
+let combineOptLists (first: List<'A> option) (second: List<'A> option) =
+    match first, second with
+    | Some f, Some s -> Some(List.append f s)
+    | Some f, None -> Some f
+    | None, Some s -> Some s
+    | _ -> None
+
+let getFullPlotlyJS () =
+    let assembly =
+        Assembly.GetExecutingAssembly()
+
+    use str =
+        assembly.GetManifestResourceStream($"Plotly.NET.plotly-{Globals.PLOTLYJS_VERSION}.min.js")
+
+    use r = new StreamReader(str)
+    r.ReadToEnd()
 
 [<AutoOpen>]
 module DynObj =
@@ -41,6 +67,7 @@ module DynObj =
             any |> DynObj.setValueOptBy dyn propName anyF
         else
             single |> DynObj.setValueOptBy dyn propName singleF
+
 
 // Copied from FSharp.Care.Collections to remove dependencies
 [<AutoOpen>]

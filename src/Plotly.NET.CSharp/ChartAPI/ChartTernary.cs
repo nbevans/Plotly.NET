@@ -43,7 +43,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart ScatterTernary<AType, BType, CType, SumType, TextType>(
+        public static GenericChart ScatterTernary<AType, BType, CType, SumType, TextType>(
             Optional<IEnumerable<AType>> A = default,
             Optional<IEnumerable<BType>> B = default,
             Optional<IEnumerable<CType>> C = default,
@@ -128,7 +128,7 @@ namespace Plotly.NET.CSharp
         /// <param name="MultiMarkerSymbol">Sets the marker symbol for each individual datum</param>
         /// <param name="Marker">Sets the marker (use this for more finegrained control than the other marker-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart PointTernary<AType, BType, CType, SumType, TextType>(
+        public static GenericChart PointTernary<AType, BType, CType, SumType, TextType>(
             Optional<IEnumerable<AType>> A = default,
             Optional<IEnumerable<BType>> B = default,
             Optional<IEnumerable<CType>> C = default,
@@ -186,7 +186,7 @@ namespace Plotly.NET.CSharp
         /// <param name="B">Sets the quantity of component `b` in each data point. If `a`, `b`, and `c` are all provided, they need not be normalized, only the relative values matter. If only two arrays are provided they must be normalized to match `ternary&lt;i&gt;.sum`.</param>
         /// <param name="C">Sets the quantity of component `c` in each data point. If `a`, `b`, and `c` are all provided, they need not be normalized, only the relative values matter. If only two arrays are provided they must be normalized to match `ternary&lt;i&gt;.sum`.</param>
         /// <param name="Sum">The number each triplet should sum to, if only two of `a`, `b`, and `c` are provided. This overrides `ternary&lt;i&gt;.sum` to normalize this specific trace, but does not affect the values displayed on the axes. 0 (or missing) means to use `ternary&lt;i&gt;.sum`</param>
-        /// <param name="ShowMarkers">Wether to show markers for the individual data points</param>
+        /// <param name="ShowMarkers">Whether to show markers for the individual data points</param>
         /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover</param>
         /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
         /// <param name="Opacity">Sets the opactity of the trace</param>
@@ -207,7 +207,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart LineTernary<AType, BType, CType, SumType, TextType>(
+        public static GenericChart LineTernary<AType, BType, CType, SumType, TextType>(
             Optional<IEnumerable<AType>> A = default,
             Optional<IEnumerable<BType>> B = default,
             Optional<IEnumerable<CType>> C = default,
@@ -301,7 +301,7 @@ namespace Plotly.NET.CSharp
         /// <param name="LineDash">sets the drawing style of the line</param>
         /// <param name="Line">Sets the line (use this for more finegrained control than the other line-associated arguments)</param>
         /// <param name="UseDefaults">If set to false, ignore the global default settings set in `Defaults`</param>
-        public static GenericChart.GenericChart BubbleTernary<AType, BType, CType, SumType, TextType>(
+        public static GenericChart BubbleTernary<AType, BType, CType, SumType, TextType>(
             IEnumerable<int> sizes,
             Optional<IEnumerable<AType>> A = default,
             Optional<IEnumerable<BType>> B = default,

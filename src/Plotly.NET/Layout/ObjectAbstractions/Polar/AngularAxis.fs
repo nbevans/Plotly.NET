@@ -30,6 +30,7 @@ type AngularAxis() =
     /// <param name="LineWidth">Sets the width (in px) of the axis line.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="GridWidth">Sets the width (in px) of the grid lines.</param>
     /// <param name="TickMode">Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `TickVals` and the tick text is `TickText`. ("array" is the default value if `TickVals` is provided).</param>
     /// <param name="NTicks">Specifies the maximum number of ticks for the particular axis. The actual number of ticks will be chosen automatically to be less than or equal to `nticks`. Has an effect only if `tickmode` is set to "auto".</param>
@@ -54,6 +55,8 @@ type AngularAxis() =
     /// <param name="TickAngle">Sets the angle of the tick labels with respect to the horizontal. For example, a `tickangle` of -90 draws the tick labels vertically.</param>
     /// <param name="TickFormat">Sets the tick label formatting rule using d3 formatting mini-languages which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format. And for dates see: https://github.com/d3/d3-time-format#locale_format. We add two items to d3's date formatter: "%h" for half of the year as a decimal number as well as "%{n}f" for fractional seconds with n digits. For example, "2016-10-13 09:15:23.456" with TickFormat "%H~%M~%S.%2f" would display "09~15~23.46"</param>
     /// <param name="TickFormatStops">Set rules for customizing TickFormat on different zoom levels</param>
+    /// <param name="TickLabelStep">Sets the spacing between tick labels as compared to the spacing between ticks. A value of 1 (default) means each tick gets a label. A value of 2 means shows every 2nd label. A larger value n means only every nth tick is labeled. `tick0` determines which labels are shown. Not implemented for axes with `type` "log" or "multicategory", or when `tickmode` is "array".</param>
+    /// <param name="LabelAlias">Replacement text for specific tick or hover labels. For example using {US: 'USA', CA: 'Canada'} changes US to USA and CA to Canada. The labels we would have shown must match the keys exactly, after adding any tickprefix or ticksuffix. labelalias can be used with any axis type, and both keys (if needed) and values (if desired) can include html-like tags or MathJax.</param>
     /// <param name="Layer">Sets the layer on which this axis is displayed. If "above traces", this axis is displayed above all the subplot's traces If "below traces", this axis is displayed below all the subplot's traces, but above the grid lines. Useful when used together with scatter-like traces with `cliponaxis` set to "false" to show markers and/or text nodes above this axis.</param>
     static member init
         (
@@ -74,6 +77,7 @@ type AngularAxis() =
             [<Optional; DefaultParameterValue(null)>] ?LineWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?GridWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?TickMode: StyleParam.TickMode,
             [<Optional; DefaultParameterValue(null)>] ?NTicks: int,
@@ -98,6 +102,8 @@ type AngularAxis() =
             [<Optional; DefaultParameterValue(null)>] ?TickAngle: int,
             [<Optional; DefaultParameterValue(null)>] ?TickFormat: string,
             [<Optional; DefaultParameterValue(null)>] ?TickFormatStops: seq<TickFormatStop>,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelStep: int,
+            [<Optional; DefaultParameterValue(null)>] ?LabelAlias: DynamicObj,
             [<Optional; DefaultParameterValue(null)>] ?Layer: StyleParam.Layer
         ) =
         AngularAxis()
@@ -119,6 +125,7 @@ type AngularAxis() =
             ?LineWidth = LineWidth,
             ?ShowGrid = ShowGrid,
             ?GridColor = GridColor,
+            ?GridDash = GridDash,
             ?GridWidth = GridWidth,
             ?TickMode = TickMode,
             ?NTicks = NTicks,
@@ -143,6 +150,8 @@ type AngularAxis() =
             ?TickAngle = TickAngle,
             ?TickFormat = TickFormat,
             ?TickFormatStops = TickFormatStops,
+            ?TickLabelStep = TickLabelStep,
+            ?LabelAlias = LabelAlias,
             ?Layer = Layer
         )
 
@@ -166,6 +175,7 @@ type AngularAxis() =
     /// <param name="LineWidth">Sets the width (in px) of the axis line.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="GridWidth">Sets the width (in px) of the grid lines.</param>
     /// <param name="TickMode">Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `TickVals` and the tick text is `TickText`. ("array" is the default value if `TickVals` is provided).</param>
     /// <param name="NTicks">Specifies the maximum number of ticks for the particular axis. The actual number of ticks will be chosen automatically to be less than or equal to `nticks`. Has an effect only if `tickmode` is set to "auto".</param>
@@ -190,6 +200,8 @@ type AngularAxis() =
     /// <param name="TickAngle">Sets the angle of the tick labels with respect to the horizontal. For example, a `tickangle` of -90 draws the tick labels vertically.</param>
     /// <param name="TickFormat">Sets the tick label formatting rule using d3 formatting mini-languages which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format. And for dates see: https://github.com/d3/d3-time-format#locale_format. We add two items to d3's date formatter: "%h" for half of the year as a decimal number as well as "%{n}f" for fractional seconds with n digits. For example, "2016-10-13 09:15:23.456" with TickFormat "%H~%M~%S.%2f" would display "09~15~23.46"</param>
     /// <param name="TickFormatStops">Set rules for customizing TickFormat on different zoom levels</param>
+    /// <param name="TickLabelStep">Sets the spacing between tick labels as compared to the spacing between ticks. A value of 1 (default) means each tick gets a label. A value of 2 means shows every 2nd label. A larger value n means only every nth tick is labeled. `tick0` determines which labels are shown. Not implemented for axes with `type` "log" or "multicategory", or when `tickmode` is "array".</param>
+    /// <param name="LabelAlias">Replacement text for specific tick or hover labels. For example using {US: 'USA', CA: 'Canada'} changes US to USA and CA to Canada. The labels we would have shown must match the keys exactly, after adding any tickprefix or ticksuffix. labelalias can be used with any axis type, and both keys (if needed) and values (if desired) can include html-like tags or MathJax.</param>
     /// <param name="Layer">Sets the layer on which this axis is displayed. If "above traces", this axis is displayed above all the subplot's traces If "below traces", this axis is displayed below all the subplot's traces, but above the grid lines. Useful when used together with scatter-like traces with `cliponaxis` set to "false" to show markers and/or text nodes above this axis.</param>
     static member style
         (
@@ -210,6 +222,7 @@ type AngularAxis() =
             [<Optional; DefaultParameterValue(null)>] ?LineWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?GridWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?TickMode: StyleParam.TickMode,
             [<Optional; DefaultParameterValue(null)>] ?NTicks: int,
@@ -234,6 +247,8 @@ type AngularAxis() =
             [<Optional; DefaultParameterValue(null)>] ?TickAngle: int,
             [<Optional; DefaultParameterValue(null)>] ?TickFormat: string,
             [<Optional; DefaultParameterValue(null)>] ?TickFormatStops: seq<TickFormatStop>,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelStep: int,
+            [<Optional; DefaultParameterValue(null)>] ?LabelAlias: DynamicObj,
             [<Optional; DefaultParameterValue(null)>] ?Layer: StyleParam.Layer
         ) =
         fun (angularAxis: AngularAxis) ->
@@ -255,6 +270,7 @@ type AngularAxis() =
             LineWidth |> DynObj.setValueOpt angularAxis "linewidth"
             ShowGrid |> DynObj.setValueOpt angularAxis "showgrid"
             GridColor |> DynObj.setValueOpt angularAxis "gridcolor"
+            GridDash |> DynObj.setValueOptBy angularAxis "griddash" StyleParam.DrawingStyle.convert
             GridWidth |> DynObj.setValueOpt angularAxis "gridwidth"
             TickMode |> DynObj.setValueOptBy angularAxis "tickmode" StyleParam.TickMode.convert
             NTicks |> DynObj.setValueOpt angularAxis "nticks"
@@ -279,6 +295,8 @@ type AngularAxis() =
             TickAngle |> DynObj.setValueOpt angularAxis "tickangle"
             TickFormat |> DynObj.setValueOpt angularAxis "tickformat"
             TickFormatStops |> DynObj.setValueOpt angularAxis "tickformatstops"
+            TickLabelStep |> DynObj.setValueOpt angularAxis "ticklabelstep"
+            LabelAlias |> DynObj.setValueOpt angularAxis "labelalias"
             Layer |> DynObj.setValueOptBy angularAxis "layer" StyleParam.Layer.convert
 
             angularAxis

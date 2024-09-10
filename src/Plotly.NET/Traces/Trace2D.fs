@@ -116,6 +116,7 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -123,9 +124,11 @@ type Trace2DStyle() =
     /// <param name="Mode">Determines the drawing mode for this scatter trace. If the provided `mode` includes "text" then the `text` elements appear at the coordinates. Otherwise, the `text` elements appear on hover. If there are less than 20 points and the trace is not stacked then the default is "lines+markers". Otherwise, "lines".</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="Text">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
@@ -147,6 +150,8 @@ type Trace2DStyle() =
     /// <param name="YAxis">Sets a reference between this trace's y coordinates and a 2D cartesian y axis. If "y" (the default value), the y coordinates refer to `layout.yaxis`. If "y2", the y coordinates refer to `layout.yaxis2`, and so on.</param>
     /// <param name="Orientation">Only relevant when `stackgroup` is used, and only the first `orientation` found in the `stackgroup` will be used - including if `visible` is "legendonly" but not if it is `false`. Sets the stacking direction. With "v" ("h"), the y (x) values of subsequent traces are added. Also affects the default value of `fill`.</param>
     /// <param name="GroupNorm">Only relevant when `stackgroup` is used, and only the first `groupnorm` found in the `stackgroup` will be used - including if `visible` is "legendonly" but not if it is `false`. Sets the normalization for the sum of this `stackgroup`. With "fraction", the value of each trace at each location is divided by the sum of all trace values at that location. "percent" is the same but multiplied by 100 to show percentages. If there are multiple subplots, or multiple `stackgroup`s on one subplot, each will be normalized within its own set.</param>
+    /// <param name="AlignmentGroup">Set several traces linked to the same position axis or matching axes to the same alignmentgroup. This controls whether bars compute their positional range dependently or independently.</param>
+    /// <param name="OffsetGroup">Set several traces linked to the same position axis or matching axes to the same offsetgroup where bars of the same position coordinate will line up.</param>
     /// <param name="StackGroup">Set several scatter traces (on the same subplot) to the same stackgroup in order to add their y values (or their x values if `orientation` is "h"). If blank or omitted this trace will not be stacked. Stacking also turns `fill` on by default, using "tonexty" ("tonextx") if `orientation` is "h" ("v") and sets the default `mode` to "lines" irrespective of point count. You can only stack on a numeric (linear or log) axis. Traces in a `stackgroup` will only fill to (or be filled to) other traces in the same group. With multiple `stackgroup`s or some traces stacked and some not, if fill-linked traces are not already consecutive, the later ones will be pushed down in the drawing order.</param>
     /// <param name="XPeriod">Only relevant when the axis `type` is "date". Sets the period positioning in milliseconds or "M&lt;n&gt;" on the x axis. Special values in the form of "M&lt;n&gt;" could be used to declare the number of months. In this case `n` must be a positive integer.</param>
     /// <param name="XPeriodAlignment">Only relevant when the axis `type` is "date". Sets the alignment of data points on the x axis.</param>
@@ -166,6 +171,7 @@ type Trace2DStyle() =
     /// <param name="ConnectGaps">Determines whether or not gaps (i.e. {nan} or missing values) in the provided data arrays are connected.</param>
     /// <param name="Fill">Sets the area to fill with a solid color. Defaults to "none" unless this trace is stacked, then it gets "tonexty" ("tonextx") if `orientation` is "v" ("h") Use with `fillcolor` if not "none". "tozerox" and "tozeroy" fill to x=0 and y=0 respectively. "tonextx" and "tonexty" fill between the endpoints of this trace and the endpoints of the trace before it, connecting those endpoints with straight lines (to make a stacked area graph); if there is no trace before it, they behave like "tozerox" and "tozeroy". "toself" connects the endpoints of the trace (or each segment of the trace if it has gaps) into a closed shape. "tonext" fills the space between two traces if one completely encloses the other (eg consecutive contour lines), and behaves like "toself" if there is no trace before it. "tonext" should not be used if one trace does not enclose the other. Traces in a `stackgroup` will only fill to (or be filled to) other traces in the same group. With multiple `stackgroup`s or some traces stacked and some not, if fill-linked traces are not already consecutive, the later ones will be pushed down in the drawing order.</param>
     /// <param name="FillColor">Sets the fill color. Defaults to a half-transparent variant of the line color, marker color, or marker line color, whichever is available.</param>
+    /// <param name="FillPattern">Sets the pattern within the marker.</param>
     /// <param name="HoverLabel">Sets the style of the hoverlabels of this trace.</param>
     /// <param name="HoverOn">Do the hover effects highlight individual points (markers or line points) or do they highlight filled regions? If the fill is "toself" or "tonext" and there are no markers or text, then the default is "fills", otherwise it is "points".</param>
     /// <param name="StackGaps">Only relevant when `stackgroup` is used, and only the first `stackgaps` found in the `stackgroup` will be used - including if `visible` is "legendonly" but not if it is `false`. Determines how we handle locations at which other traces in this group have data but this one does not. With "infer zero" we insert a zero at these locations. With "interpolate" we linearly interpolate between existing values, and extrapolate a constant beyond the existing values.</param>
@@ -177,6 +183,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -184,9 +191,11 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Mode: StyleParam.Mode,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Text: #IConvertible,
@@ -208,6 +217,8 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?YAxis: StyleParam.LinearAxisId,
             [<Optional; DefaultParameterValue(null)>] ?Orientation: StyleParam.Orientation,
             [<Optional; DefaultParameterValue(null)>] ?GroupNorm: StyleParam.GroupNorm,
+            [<Optional; DefaultParameterValue(null)>] ?AlignmentGroup: string,
+            [<Optional; DefaultParameterValue(null)>] ?OffsetGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?StackGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?XPeriod: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?XPeriodAlignment: StyleParam.PeriodAlignment,
@@ -221,12 +232,13 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?XError: Error,
             [<Optional; DefaultParameterValue(null)>] ?YError: Error,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?ClipOnAxis: bool,
             [<Optional; DefaultParameterValue(null)>] ?ConnectGaps: bool,
             [<Optional; DefaultParameterValue(null)>] ?Fill: StyleParam.Fill,
             [<Optional; DefaultParameterValue(null)>] ?FillColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?FillPattern: Pattern,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
             [<Optional; DefaultParameterValue(null)>] ?HoverOn: StyleParam.HoverOn,
             [<Optional; DefaultParameterValue(null)>] ?StackGaps: StyleParam.StackGaps,
@@ -239,16 +251,17 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Opacity |> DynObj.setValueOpt trace "opacity"
             Mode |> DynObj.setValueOptBy trace "mode" StyleParam.Mode.convert
             Ids |> DynObj.setValueOpt trace "ids"
-            X |> DynObj.setValueOpt trace "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt trace "x"
             X0 |> DynObj.setValueOpt trace "x0"
             DX |> DynObj.setValueOpt trace "dx"
-            Y |> DynObj.setValueOpt trace "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt trace "y"
             Y0 |> DynObj.setValueOpt trace "y0"
             DY |> DynObj.setValueOpt trace "dy"
             (Text, MultiText) |> DynObj.setSingleOrMultiOpt trace "text"
@@ -268,6 +281,8 @@ type Trace2DStyle() =
             YAxis |> DynObj.setValueOptBy trace "yaxis" StyleParam.LinearAxisId.convert
             Orientation |> DynObj.setValueOptBy trace "orientation" StyleParam.Orientation.convert
             GroupNorm |> DynObj.setValueOptBy trace "groupnorm" StyleParam.GroupNorm.convert
+            AlignmentGroup |> DynObj.setValueOpt trace "alignmentgroup"
+            OffsetGroup |> DynObj.setValueOpt trace "offsetgroup"
             StackGroup |> DynObj.setValueOpt trace "stackgroup"
             XPeriod |> DynObj.setValueOpt trace "xperiod"
             XPeriodAlignment |> DynObj.setValueOptBy trace "xperiodalignment" StyleParam.PeriodAlignment.convert
@@ -287,6 +302,7 @@ type Trace2DStyle() =
             ConnectGaps |> DynObj.setValueOpt trace "connectgaps"
             Fill |> DynObj.setValueOptBy trace "fill" StyleParam.Fill.convert
             FillColor |> DynObj.setValueOpt trace "fillcolor"
+            FillPattern |> DynObj.setValueOpt trace "fillpattern"
             HoverLabel |> DynObj.setValueOpt trace "hoverlabel"
             HoverOn |> DynObj.setValueOptBy trace "hoveron" StyleParam.HoverOn.convert
             StackGaps |> DynObj.setValueOptBy trace "stackgaps" StyleParam.StackGaps.convert
@@ -302,15 +318,18 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="Base">Sets where the bar base is drawn (in position axis units). In "stack" or "relative" barmode, traces that set "base" will be excluded and drawn in "overlay" mode instead.</param>
@@ -366,15 +385,18 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Base: #IConvertible,
@@ -414,8 +436,8 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?XError: Error,
             [<Optional; DefaultParameterValue(null)>] ?YError: Error,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?ClipOnAxis: bool,
             [<Optional; DefaultParameterValue(null)>] ?Constraintext: StyleParam.ConstrainText,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
@@ -431,15 +453,16 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt bar "name"
             Visible |> DynObj.setValueOptBy bar "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt bar "showlegend"
+            Legend |> DynObj.setValueOptBy bar "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt bar "legendrank"
             LegendGroup |> DynObj.setValueOpt bar "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt bar "legendgrouptitle"
             Opacity |> DynObj.setValueOpt bar "opacity"
             Ids |> DynObj.setValueOpt bar "ids"
-            X |> DynObj.setValueOpt bar "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt bar "x"
             X0 |> DynObj.setValueOpt bar "x0"
             DX |> DynObj.setValueOpt bar "dx"
-            Y |> DynObj.setValueOpt bar "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt bar "y"
             Y0 |> DynObj.setValueOpt bar "y0"
             DY |> DynObj.setValueOpt bar "dy"
             Base |> DynObj.setValueOpt bar "base"
@@ -489,7 +512,7 @@ type Trace2DStyle() =
 
             bar
 
-            )
+        )
 
     /// <summary>
     /// Create a function that applies the styles of a funnel plot to a Trace object
@@ -497,15 +520,18 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="Width">Sets the bar width (in position axis units).</param>
@@ -554,15 +580,18 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Width: float,
@@ -612,15 +641,16 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt funnel "name"
             Visible |> DynObj.setValueOptBy funnel "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt funnel "showlegend"
+            Legend |> DynObj.setValueOptBy funnel "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt funnel "legendrank"
             LegendGroup |> DynObj.setValueOpt funnel "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt funnel "legendgrouptitle"
             Opacity |> DynObj.setValueOpt funnel "opacity"
             Ids |> DynObj.setValueOpt funnel "ids"
-            X |> DynObj.setValueOpt funnel "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt funnel "x"
             X0 |> DynObj.setValueOpt funnel "x0"
             DX |> DynObj.setValueOpt funnel "dx"
-            Y |> DynObj.setValueOpt funnel "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt funnel "y"
             Y0 |> DynObj.setValueOpt funnel "y0"
             DY |> DynObj.setValueOpt funnel "dy"
             Width |> DynObj.setValueOpt funnel "width"
@@ -665,7 +695,7 @@ type Trace2DStyle() =
 
             funnel
 
-            )
+        )
 
     /// <summary>
     /// Create a function that applies the styles of a waterfall plot to a Trace object
@@ -673,15 +703,18 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="Base">Sets where the bar base is drawn (in position axis units).</param>
@@ -736,15 +769,18 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Base: #IConvertible,
@@ -800,15 +836,16 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Opacity |> DynObj.setValueOpt trace "opacity"
             Ids |> DynObj.setValueOpt trace "ids"
-            X |> DynObj.setValueOpt trace "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt trace "x"
             X0 |> DynObj.setValueOpt trace "x0"
             DX |> DynObj.setValueOpt trace "dx"
-            Y |> DynObj.setValueOpt trace "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt trace "y"
             Y0 |> DynObj.setValueOpt trace "y0"
             DY |> DynObj.setValueOpt trace "dy"
             Base |> DynObj.setValueOpt trace "base"
@@ -864,15 +901,21 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the sample data to be binned on the x axis.</param>
+    /// <param name="MultiX">Sets the sample data to be binned on the x axis.</param>
     /// <param name="Y">Sets the sample data to be binned on the y axis.</param>
+    /// <param name="MultiY">Sets the sample data to be binned on the y axis.</param>
     /// <param name="Text">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
     /// <param name="MultiText">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
+    /// <param name="TextPosition">Sets the positions of the `text` elements with respects to the (x,y) coordinates.</param>
+    /// <param name="TextTemplate">Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
+    /// <param name="MultiTextTemplate">Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
     /// <param name="HoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="MultiHoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="HoverInfo">Determines which trace information appear on hover. If `none` or `skip` are set, no information is displayed upon hovering. But, if `none` is set, click and hover events are still fired.</param>
@@ -897,14 +940,21 @@ type Trace2DStyle() =
     /// <param name="XBins">Sets the binning across the x dimension</param>
     /// <param name="YBins">Sets the binning across the y dimension</param>
     /// <param name="Marker">Sets the marker of this trace.</param>
+    /// <param name="TextAngle">Sets the angle of the tick labels with respect to the bar. For example, a `tickangle` of -90 draws the tick labels vertically. With "auto" the texts may automatically be rotated to fit with the maximum size in bars.</param>
+    /// <param name="TextFont">Sets the font used for `text`.</param>
     /// <param name="Line">Sets the line of this trace.</param>
     /// <param name="XError">Sets the x error of this trace.</param>
     /// <param name="YError">Sets the y error of this trace.</param>
     /// <param name="SelectedPoints">Array containing integer indices of selected points. Has an effect only for traces that support selections. Note that an empty array means an empty selection where the `unselected` are turned on for all points, whereas, any other non-array values means no selection all where the `selected` and `unselected` styles have no effect.</param>
     /// <param name="Selected">Sets the style of selected points of this trace.</param>
     /// <param name="Unselected">Sets the style of unselected points of this trace.</param>
-    /// <param name="Cumulative">Sets wether and how the cumulative distribution is displayed</param>
+    /// <param name="ClipOnAxis">Determines whether the text nodes are clipped about the subplot axes. To show the text nodes above axis lines and tick labels, make sure to set `xaxis.layer` and `yaxis.layer` to "below traces".</param>
+    /// <param name="Constraintext">Constrain the size of text inside or outside a bar to be no larger than the bar itself.</param>
+    /// <param name="Cumulative">Sets whether and how the cumulative distribution is displayed</param>
     /// <param name="HoverLabel">Sets the style of the hoverlabels of this trace.</param>
+    /// <param name="InsideTextAnchor">Determines if texts are kept at center or start/end points in `textposition` "inside" mode.</param>
+    /// <param name="InsideTextFont">Sets the font used for `text` lying inside the bar.</param>
+    /// <param name="OutsideTextFont">Sets the font used for `text` lying outside the bar.</param>
     /// <param name="XCalendar">Sets the calendar system to use with `x` date data.</param>
     /// <param name="YCalendar">Sets the calendar system to use with `y` date data.</param>
     /// <param name="UIRevision">Controls persistence of some user-driven changes to the trace: `constraintrange` in `parcoords` traces, as well as some `editable: true` modifications such as `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible` is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config: {editable: true}`) is controlled by `layout.editrevision`. Trace changes are tracked by `uid`, which only falls back on trace index if no `uid` is provided. So if your app can add/remove traces before the end of the `data` array, such that the same trace has a different index, you can still preserve user-driven changes if you give each trace a `uid` that stays with it as it moves.</param>
@@ -913,15 +963,21 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Text: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?MultiText: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?TextPosition: StyleParam.TextPosition,
+            [<Optional; DefaultParameterValue(null)>] ?TextTemplate: string,
+            [<Optional; DefaultParameterValue(null)>] ?MultiTextTemplate: seq<string>,
             [<Optional; DefaultParameterValue(null)>] ?HoverText: string,
             [<Optional; DefaultParameterValue(null)>] ?MultiHoverText: seq<string>,
             [<Optional; DefaultParameterValue(null)>] ?HoverInfo: StyleParam.HoverInfo,
@@ -946,14 +1002,21 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?XBins: Bins,
             [<Optional; DefaultParameterValue(null)>] ?YBins: Bins,
             [<Optional; DefaultParameterValue(null)>] ?Marker: Marker,
+            [<Optional; DefaultParameterValue(null)>] ?TextAngle: float,
+            [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
             [<Optional; DefaultParameterValue(null)>] ?XError: Error,
             [<Optional; DefaultParameterValue(null)>] ?YError: Error,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?ClipOnAxis: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Constraintext: StyleParam.ConstrainText,
             [<Optional; DefaultParameterValue(null)>] ?Cumulative: Cumulative,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
+            [<Optional; DefaultParameterValue(null)>] ?InsideTextAnchor: StyleParam.InsideTextAnchor,
+            [<Optional; DefaultParameterValue(null)>] ?InsideTextFont: Font,
+            [<Optional; DefaultParameterValue(null)>] ?OutsideTextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?XCalendar: StyleParam.Calendar,
             [<Optional; DefaultParameterValue(null)>] ?YCalendar: StyleParam.Calendar,
             [<Optional; DefaultParameterValue(null)>] ?UIRevision: string
@@ -963,14 +1026,17 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt histogram "name"
             Visible |> DynObj.setValueOptBy histogram "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt histogram "showlegend"
+            Legend |> DynObj.setValueOptBy histogram "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt histogram "legendrank"
             LegendGroup |> DynObj.setValueOpt histogram "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt histogram "legendgrouptitle"
             Opacity |> DynObj.setValueOpt histogram "opacity"
             Ids |> DynObj.setValueOpt histogram "ids"
-            X |> DynObj.setValueOpt histogram "x"
-            Y |> DynObj.setValueOpt histogram "y"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt histogram "x"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt histogram "y"
             (Text, MultiText) |> DynObj.setSingleOrMultiOpt histogram "text"
+            TextPosition |> DynObj.setValueOptBy histogram "textposition" StyleParam.TextPosition.convert
+            (TextTemplate, MultiTextTemplate) |> DynObj.setSingleOrMultiOpt histogram "texttemplate"
             (HoverText, MultiHoverText) |> DynObj.setSingleOrMultiOpt histogram "hovertext"
             HoverInfo |> DynObj.setValueOptBy histogram "hoverinfo" StyleParam.HoverInfo.convert
             (HoverTemplate, MultiHoverTemplate) |> DynObj.setSingleOrMultiOpt histogram "hovertemplate"
@@ -993,14 +1059,21 @@ type Trace2DStyle() =
             XBins |> DynObj.setValueOpt histogram "xbins"
             YBins |> DynObj.setValueOpt histogram "ybins"
             Marker |> DynObj.setValueOpt histogram "marker"
+            TextAngle |> DynObj.setValueOpt histogram "textangle"
+            TextFont |> DynObj.setValueOpt histogram "textfont"
             Line |> DynObj.setValueOpt histogram "line"
             XError |> DynObj.setValueOpt histogram "error_x"
             YError |> DynObj.setValueOpt histogram "error_y"
             SelectedPoints |> DynObj.setValueOpt histogram "selectedpoints"
             Selected |> DynObj.setValueOpt histogram "selected"
             Unselected |> DynObj.setValueOpt histogram "unselected"
+            ClipOnAxis |> DynObj.setValueOpt histogram "cliponaxis"
+            Constraintext |> DynObj.setValueOptBy histogram "constraintext" StyleParam.ConstrainText.convert
             Cumulative |> DynObj.setValueOpt histogram "cumulative"
             HoverLabel |> DynObj.setValueOpt histogram "hoverlabel"
+            InsideTextAnchor |> DynObj.setValueOptBy histogram "insidetextanchor" StyleParam.InsideTextAnchor.convert
+            InsideTextFont |> DynObj.setValueOpt histogram "insidetextfont"
+            OutsideTextFont |> DynObj.setValueOpt histogram "outsidetextfont"
             XCalendar |> DynObj.setValueOptBy histogram "xcalendar" StyleParam.Calendar.convert
             YCalendar |> DynObj.setValueOptBy histogram "ycalendar" StyleParam.Calendar.convert
             UIRevision |> DynObj.setValueOpt histogram "uirevision"
@@ -1013,15 +1086,19 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
+    /// <param name="LegendWidth">Sets the width (in px or fraction) of the legend for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x sample data or coordinates. See overview for more info.</param>
+    /// <param name="MultiX">Sets the x sample data or coordinates. See overview for more info.</param>
     /// <param name="X0">Sets the x coordinate for single-box traces or the starting coordinate for multi-box traces set using q1/median/q3. See overview for more info.</param>
     /// <param name="DX">Sets the x coordinate step for multi-box traces set using q1/median/q3.</param>
     /// <param name="Y">Sets the y sample data or coordinates. See overview for more info.</param>
+    /// <param name="MultiY">Sets the y sample data or coordinates. See overview for more info.</param>
     /// <param name="Y0">Sets the y coordinate for single-box traces or the starting coordinate for multi-box traces set using q1/median/q3. See overview for more info.</param>
     /// <param name="DY">Sets the y coordinate step for multi-box traces set using q1/median/q3.</param>
     /// <param name="Width">Sets the width of the box in data coordinate If "0" (default value) the width is automatically selected based on the positions of other box traces in the same subplot.</param>
@@ -1053,6 +1130,7 @@ type Trace2DStyle() =
     /// <param name="BoxPoints">If "outliers", only the sample points lying outside the whiskers are shown If "suspectedoutliers", the outlier points are shown and points either less than 4"Q1-3"Q3 or greater than 4"Q3-3"Q1 are highlighted (see `outliercolor`) If "all", all sample points are shown If "false", only the box(es) are shown with no sample points Defaults to "suspectedoutliers" when `marker.outliercolor` or `marker.line.outliercolor` is set. Defaults to "all" under the q1/median/q3 signature. Otherwise defaults to "outliers".</param>
     /// <param name="Notched">Determines whether or not notches are drawn. Notches displays a confidence interval around the median. We compute the confidence interval as median +/- 1.57 " IQR / sqrt(N), where IQR is the interquartile range and N is the sample size. If two boxes' notches do not overlap there is 95% confidence their medians differ. See https://sites.google.com/site/davidsstatistics/home/notched-box-plots for more info. Defaults to "false" unless `notchwidth` or `notchspan` is set.</param>
     /// <param name="NotchWidth">Sets the width of the notches relative to the box' width. For example, with 0, the notches are as wide as the box(es).</param>
+    /// <param name="ShowWhiskers">Determines whether or not whiskers are visible. Defaults to true for `sizemode` "quartiles", false for "sd".</param>
     /// <param name="WhiskerWidth">Sets the width of the whiskers relative to the box' width. For example, with 1, the whiskers are as wide as the box(es).</param>
     /// <param name="Q1">Sets the Quartile 1 values. There should be as many items as the number of boxes desired.</param>
     /// <param name="Median">Sets the Quartile 1 values. There should be as many items as the number of boxes desired.</param>
@@ -1062,6 +1140,7 @@ type Trace2DStyle() =
     /// <param name="NotchSpan">Sets the notch span from the boxes' `median` values. There should be as many items as the number of boxes desired. This attribute has effect only under the q1/median/q3 signature. If `notchspan` is not provided but a sample (in `y` or `x`) is set, we compute it as 1.57 " IQR / sqrt(N), where N is the sample size.</param>
     /// <param name="Mean">Sets the mean values. There should be as many items as the number of boxes desired. This attribute has effect only under the q1/median/q3 signature. If `mean` is not provided but a sample (in `y` or `x`) is set, we compute the mean for each box using the sample values.</param>
     /// <param name="SD">Sets the standard deviation values. There should be as many items as the number of boxes desired. This attribute has effect only under the q1/median/q3 signature. If `sd` is not provided but a sample (in `y` or `x`) is set, we compute the standard deviation for each box using the sample values.</param>
+    /// <param name="SDMultiple">Scales the box size when sizemode=sd Allowing boxes to be drawn across any stddev range For example 1-stddev, 3-stddev, 5-stddev</param>
     /// <param name="QuartileMethod">Sets the method used to compute the sample's Q1 and Q3 quartiles. The "linear" method uses the 25th percentile for Q1 and 75th percentile for Q3 as computed using method #10 (listed on http://www.amstat.org/publications/jse/v14n3/langford.html). The "exclusive" method uses the median to divide the ordered dataset into two halves if the sample is odd, it does not include the median in either half - Q1 is then the median of the lower half and Q3 the median of the upper half. The "inclusive" method also uses the median to divide the ordered dataset into two halves but if the sample is odd, it includes the median in both halves - Q1 is then the median of the lower half and Q3 the median of the upper half.</param>
     /// <param name="SelectedPoints">Array containing integer indices of selected points. Has an effect only for traces that support selections. Note that an empty array means an empty selection where the `unselected` are turned on for all points, whereas, any other non-array values means no selection all where the `selected` and `unselected` styles have no effect.</param>
     /// <param name="Selected">Sets the style of selected points of this trace.</param>
@@ -1071,6 +1150,7 @@ type Trace2DStyle() =
     /// <param name="HoverOn">Do the hover effects highlight individual boxes or sample points or both?</param>
     /// <param name="PointPos">Sets the position of the sample points in relation to the box(es). If "0", the sample points are places over the center of the box(es). Positive (negative) values correspond to positions to the right (left) for vertical boxes and above (below) for horizontal boxes</param>
     /// <param name="Jitter">Sets the amount of jitter in the sample points drawn. If "0", the sample points align along the distribution axis. If "1", the sample points are drawn in a random jitter of width equal to the width of the box(es).</param>
+    /// <param name="SizeMode">Sets the upper and lower bound for the boxes quartiles means box is drawn between Q1 and Q3 SD means the box is drawn between Mean +- Standard Deviation Argument sdmultiple (default 1) to scale the box size So it could be drawn 1-stddev, 3-stddev etc</param>
     /// <param name="XCalendar">Sets the calendar system to use with `x` date data.</param>
     /// <param name="YCalendar">Sets the calendar system to use with `y` date data.</param>
     /// <param name="UIRevision">Controls persistence of some user-driven changes to the trace: `constraintrange` in `parcoords` traces, as well as some `editable: true` modifications such as `name` and `colorbar.title`. Defaults to `layout.uirevision`. Note that other user-driven trace attribute changes are controlled by `layout` attributes: `trace.visible` is controlled by `layout.legend.uirevision`, `selectedpoints` is controlled by `layout.selectionrevision`, and `colorbar.(x|y)` (accessible with `config: {editable: true}`) is controlled by `layout.editrevision`. Trace changes are tracked by `uid`, which only falls back on trace index if no `uid` is provided. So if your app can add/remove traces before the end of the `data` array, such that the same trace has a different index, you can still preserve user-driven changes if you give each trace a `uid` that stays with it as it moves.</param>
@@ -1079,15 +1159,19 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
+            [<Optional; DefaultParameterValue(null)>] ?LegendWidth: float,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Width: float,
@@ -1119,6 +1203,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?BoxPoints: StyleParam.BoxPoints,
             [<Optional; DefaultParameterValue(null)>] ?Notched: bool,
             [<Optional; DefaultParameterValue(null)>] ?NotchWidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?ShowWhiskers: bool,
             [<Optional; DefaultParameterValue(null)>] ?WhiskerWidth: float,
             [<Optional; DefaultParameterValue(null)>] ?Q1: seq<IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Median: seq<IConvertible>,
@@ -1128,15 +1213,17 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?NotchSpan: seq<IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Mean: seq<IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?SD: seq<IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?SDMultiple: float,
             [<Optional; DefaultParameterValue(null)>] ?QuartileMethod: StyleParam.QuartileMethod,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?FillColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
             [<Optional; DefaultParameterValue(null)>] ?HoverOn: StyleParam.HoverOn,
             [<Optional; DefaultParameterValue(null)>] ?PointPos: float,
             [<Optional; DefaultParameterValue(null)>] ?Jitter: float,
+            [<Optional; DefaultParameterValue(null)>] ?SizeMode: StyleParam.BoxSizeMode,
             [<Optional; DefaultParameterValue(null)>] ?XCalendar: StyleParam.Calendar,
             [<Optional; DefaultParameterValue(null)>] ?YCalendar: StyleParam.Calendar,
             [<Optional; DefaultParameterValue(null)>] ?UIRevision: string
@@ -1146,15 +1233,17 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt boxPlot "name"
             Visible |> DynObj.setValueOptBy boxPlot "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt boxPlot "showlegend"
+            Legend |> DynObj.setValueOptBy boxPlot "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt boxPlot "legendrank"
             LegendGroup |> DynObj.setValueOpt boxPlot "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt boxPlot "legendgrouptitle"
+            LegendWidth |> DynObj.setValueOpt boxPlot "legendwidth"
             Opacity |> DynObj.setValueOpt boxPlot "opacity"
             Ids |> DynObj.setValueOpt boxPlot "ids"
-            X |> DynObj.setValueOpt boxPlot "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt boxPlot "x"
             X0 |> DynObj.setValueOpt boxPlot "x0"
             DX |> DynObj.setValueOpt boxPlot "dx"
-            Y |> DynObj.setValueOpt boxPlot "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt boxPlot "y"
             Y0 |> DynObj.setValueOpt boxPlot "y0"
             DY |> DynObj.setValueOpt boxPlot "dy"
             Width |> DynObj.setValueOpt boxPlot "width"
@@ -1184,6 +1273,7 @@ type Trace2DStyle() =
             Notched |> DynObj.setValueOpt boxPlot "notched"
             NotchWidth |> DynObj.setValueOpt boxPlot "notchwidth"
             WhiskerWidth |> DynObj.setValueOpt boxPlot "whiskerwidth"
+            ShowWhiskers |> DynObj.setValueOpt boxPlot "showwhiskers"
             Q1 |> DynObj.setValueOpt boxPlot "q1"
             Median |> DynObj.setValueOpt boxPlot "median"
             Q3 |> DynObj.setValueOpt boxPlot "q3"
@@ -1192,6 +1282,7 @@ type Trace2DStyle() =
             NotchSpan |> DynObj.setValueOpt boxPlot "notchspan"
             Mean |> DynObj.setValueOpt boxPlot "mean"
             SD |> DynObj.setValueOpt boxPlot "sd"
+            SDMultiple |> DynObj.setValueOpt boxPlot "sdmultiple"
             QuartileMethod |> DynObj.setValueOptBy boxPlot "quartilemethod" StyleParam.QuartileMethod.convert
             SelectedPoints |> DynObj.setValueOpt boxPlot "selectedpoints"
             Selected |> DynObj.setValueOpt boxPlot "selected"
@@ -1201,6 +1292,7 @@ type Trace2DStyle() =
             HoverOn |> DynObj.setValueOptBy boxPlot "hoveron" StyleParam.HoverOn.convert
             PointPos |> DynObj.setValueOpt boxPlot "pointpos"
             Jitter |> DynObj.setValueOpt boxPlot "jitter"
+            SizeMode |> DynObj.setValueOptBy boxPlot "sizemode" StyleParam.BoxSizeMode.convert
             XCalendar |> DynObj.setValueOptBy boxPlot "xcalendar" StyleParam.Calendar.convert
             YCalendar |> DynObj.setValueOptBy boxPlot "ycalendar" StyleParam.Calendar.convert
             UIRevision |> DynObj.setValueOpt boxPlot "uirevision"
@@ -1215,15 +1307,18 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x sample data or coordinates. See overview for more info.</param>
+    /// <param name="MultiX">Sets the x sample data or coordinates. See overview for more info.</param>
     /// <param name="X0">Sets the x coordinate for single-box traces or the starting coordinate for multi-box traces set using q1/median/q3. See overview for more info.</param>
     /// <param name="DX">Sets the x coordinate step for multi-box traces set using q1/median/q3.</param>
     /// <param name="Y">Sets the y sample data or coordinates. See overview for more info.</param>
+    /// <param name="MultiY">Sets the y sample data or coordinates. See overview for more info.</param>
     /// <param name="Y0">Sets the y coordinate for single-box traces or the starting coordinate for multi-box traces set using q1/median/q3. See overview for more info.</param>
     /// <param name="DY">Sets the y coordinate step for multi-box traces set using q1/median/q3.</param>
     /// <param name="Width">Sets the width of the violin in data coordinates. If "0" (default value) the width is automatically selected based on the positions of other violin traces in the same subplot.</param>
@@ -1245,7 +1340,7 @@ type Trace2DStyle() =
     /// <param name="OffsetGroup">Set several traces linked to the same position axis or matching axes to the same offsetgroup where bars of the same position coordinate will line up.</param>
     /// <param name="Marker">Sets the Marker of this trace.</param>
     /// <param name="Line">Sets the line of this trace.</param>
-    /// <param name="Box">Wether and how to draw a miniature box plot</param>
+    /// <param name="Box">Whether and how to draw a miniature box plot</param>
     /// <param name="SelectedPoints">Array containing integer indices of selected points. Has an effect only for traces that support selections. Note that an empty array means an empty selection where the `unselected` are turned on for all points, whereas, any other non-array values means no selection all where the `selected` and `unselected` styles have no effect.</param>
     /// <param name="Selected">Sets the style of selected points of this trace.</param>
     /// <param name="Unselected">Sets the style of unselected points of this trace.</param>
@@ -1255,7 +1350,7 @@ type Trace2DStyle() =
     /// <param name="HoverOn">Do the hover effects highlight individual boxes or sample points or both?</param>
     /// <param name="PointPos">Sets the position of the sample points in relation to the box(es). If "0", the sample points are places over the center of the box(es). Positive (negative) values correspond to positions to the right (left) for vertical boxes and above (below) for horizontal boxes</param>
     /// <param name="Jitter">Sets the amount of jitter in the sample points drawn. If "0", the sample points align along the distribution axis. If "1", the sample points are drawn in a random jitter of width equal to the width of the box(es).</param>
-    /// <param name="MeanLine">Wether and how to draw the meanline</param>
+    /// <param name="MeanLine">Whether and how to draw the meanline</param>
     /// <param name="Points">If "outliers", only the sample points lying outside the whiskers are shown If "suspectedoutliers", the outlier points are shown and points either less than 4"Q1-3"Q3 or greater than 4"Q3-3"Q1 are highlighted (see `outliercolor`) If "all", all sample points are shown If "false", only the violins are shown with no sample points. Defaults to "suspectedoutliers" when `marker.outliercolor` or `marker.line.outliercolor` is set, otherwise defaults to "outliers".</param>
     /// <param name="ScaleGroup">If there are multiple violins that should be sized according to to some metric (see `scalemode`), link them by providing a non-empty group id here shared by every trace in the same group. If a violin's `width` is undefined, `scalegroup` will default to the trace's name. In this case, violins with the same names will be linked together</param>
     /// <param name="ScaleMode">Sets the metric by which the width of each violin is determined."width" means each violin has the same (max) width"count" means the violins are scaled by the number of sample points makingup each violin.</param>
@@ -1268,15 +1363,18 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Width: float,
@@ -1300,8 +1398,8 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
             [<Optional; DefaultParameterValue(null)>] ?Box: Box,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?BandWidth: float,
             [<Optional; DefaultParameterValue(null)>] ?FillColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
@@ -1322,15 +1420,16 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt violin "name"
             Visible |> DynObj.setValueOptBy violin "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt violin "showlegend"
+            Legend |> DynObj.setValueOptBy violin "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt violin "legendrank"
             LegendGroup |> DynObj.setValueOpt violin "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt violin "legendgrouptitle"
             Opacity |> DynObj.setValueOpt violin "opacity"
             Ids |> DynObj.setValueOpt violin "ids"
-            X |> DynObj.setValueOpt violin "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt violin "x"
             X0 |> DynObj.setValueOpt violin "x0"
             DX |> DynObj.setValueOpt violin "dx"
-            Y |> DynObj.setValueOpt violin "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt violin "y"
             Y0 |> DynObj.setValueOpt violin "y0"
             DY |> DynObj.setValueOpt violin "dy"
             Width |> DynObj.setValueOpt violin "width"
@@ -1376,16 +1475,20 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the sample data to be binned on the x axis.</param>
+    /// <param name="MultiX">Sets the sample data to be binned on the x axis.</param>
     /// <param name="XGap">Sets the horizontal gap (in pixels) between bricks.</param>
     /// <param name="Y">Sets the sample data to be binned on the y axis.</param>
+    /// <param name="MultiY">Sets the sample data to be binned on the y axis.</param>
     /// <param name="YGap">Sets the vertical gap (in pixels) between bricks.</param>
     /// <param name="Z">Sets the aggregation data.</param>
+    /// <param name="TextTemplate">Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
     /// <param name="HoverInfo">Determines which trace information appear on hover. If `none` or `skip` are set, no information is displayed upon hovering. But, if `none` is set, click and hover events are still fired.</param>
     /// <param name="HoverTemplate">Template string used for rendering the information that appear on hover box. Note that this will override `hoverinfo`. Variables are inserted using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_}, {%xother_}. When showing info for several points, "xother" will be added to those with different x positions from the first point. An underscore before or after "(x|y)other" will add a space on that side, only when this field is shown. Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. The variables available in `hovertemplate` are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data. Additionally, every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available. variable `norm` Anything contained in tag `&lt;extra&gt;` is displayed in the secondary box, for example "&lt;extra&gt;{fullData.name}&lt;/extra&gt;". To hide the secondary box completely, use an empty tag `&lt;extra&gt;&lt;/extra&gt;`.</param>
     /// <param name="MultiHoverTemplate">Template string used for rendering the information that appear on hover box. Note that this will override `hoverinfo`. Variables are inserted using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_}, {%xother_}. When showing info for several points, "xother" will be added to those with different x positions from the first point. An underscore before or after "(x|y)other" will add a space on that side, only when this field is shown. Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. The variables available in `hovertemplate` are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data. Additionally, every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available. variable `norm` Anything contained in tag `&lt;extra&gt;` is displayed in the secondary box, for example "&lt;extra&gt;{fullData.name}&lt;/extra&gt;". To hide the secondary box completely, use an empty tag `&lt;extra&gt;&lt;/extra&gt;`.</param>
@@ -1408,6 +1511,7 @@ type Trace2DStyle() =
     /// <param name="YBinGroup">Set a group of histogram traces which will have compatible y-bin settings. Using `ybingroup`, histogram2d and histogram2dcontour traces (on axes of the same axis type) can have compatible y-bin settings. Note that the same `ybingroup` value can be used to set (1D) histogram `bingroup`</param>
     /// <param name="YBins">Sets the binning across the y dimension</param>
     /// <param name="Marker">Sets the marker of this trace.</param>
+    /// <param name="TextFont">Sets the text font of this trace.</param>
     /// <param name="ColorBar">Sets the colorbar of this trace.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `colorscale`. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="ColorScale">Sets the colorscale. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use`zmin` and `zmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
@@ -1428,16 +1532,20 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?XGap: int,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?YGap: int,
             [<Optional; DefaultParameterValue(null)>] ?Z: seq<#seq<#IConvertible>>,
+            [<Optional; DefaultParameterValue(null)>] ?TextTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?HoverInfo: StyleParam.HoverInfo,
             [<Optional; DefaultParameterValue(null)>] ?HoverTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?MultiHoverTemplate: seq<string>,
@@ -1460,6 +1568,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?YBinGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?YBins: Bins,
             [<Optional; DefaultParameterValue(null)>] ?Marker: Marker,
+            [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?ColorScale: StyleParam.Colorscale,
@@ -1481,16 +1590,18 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt histogram2D "name"
             Visible |> DynObj.setValueOptBy histogram2D "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt histogram2D "showlegend"
+            Legend |> DynObj.setValueOptBy histogram2D "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt histogram2D "legendrank"
             LegendGroup |> DynObj.setValueOpt histogram2D "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt histogram2D "legendgrouptitle"
             Opacity |> DynObj.setValueOpt histogram2D "opacity"
             Ids |> DynObj.setValueOpt histogram2D "ids"
-            X |> DynObj.setValueOpt histogram2D "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt histogram2D "x"
             XGap |> DynObj.setValueOpt histogram2D "xgap"
-            Y |> DynObj.setValueOpt histogram2D "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt histogram2D "y"
             YGap |> DynObj.setValueOpt histogram2D "ygap"
             Z |> DynObj.setValueOpt histogram2D "z"
+            TextTemplate |> DynObj.setValueOpt histogram2D "texttemplate"
             HoverInfo |> DynObj.setValueOptBy histogram2D "hoverinfo" StyleParam.HoverInfo.convert
             (HoverTemplate, MultiHoverTemplate) |> DynObj.setSingleOrMultiOpt histogram2D "hovertemplate"
             XHoverFormat |> DynObj.setValueOpt histogram2D "xhoverformat"
@@ -1512,6 +1623,7 @@ type Trace2DStyle() =
             YBinGroup |> DynObj.setValueOpt histogram2D "ybingroup"
             YBins |> DynObj.setValueOpt histogram2D "ybins"
             Marker |> DynObj.setValueOpt histogram2D "marker"
+            TextFont |> DynObj.setValueOpt histogram2D "textfont"
             ColorBar |> DynObj.setValueOpt histogram2D "colorbar"
             AutoColorScale |> DynObj.setValueOpt histogram2D "autocolorscale"
             ColorScale |> DynObj.setValueOptBy histogram2D "colorscale" StyleParam.Colorscale.convert
@@ -1536,14 +1648,18 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the sample data to be binned on the x axis.</param>
+    /// <param name="MultiX">Sets the sample data to be binned on the x axis.</param>
     /// <param name="Y">Sets the sample data to be binned on the y axis.</param>
+    /// <param name="MultiY">Sets the sample data to be binned on the y axis.</param>
     /// <param name="Z">Sets the aggregation data.</param>
+    /// <param name="TextTemplate">For this trace it only has an effect if `coloring` is set to "heatmap". Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
     /// <param name="HoverInfo">Determines which trace information appear on hover. If `none` or `skip` are set, no information is displayed upon hovering. But, if `none` is set, click and hover events are still fired.</param>
     /// <param name="HoverTemplate">Template string used for rendering the information that appear on hover box. Note that this will override `hoverinfo`. Variables are inserted using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_}, {%xother_}. When showing info for several points, "xother" will be added to those with different x positions from the first point. An underscore before or after "(x|y)other" will add a space on that side, only when this field is shown. Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. The variables available in `hovertemplate` are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data. Additionally, every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available. variable `norm` Anything contained in tag `&lt;extra&gt;` is displayed in the secondary box, for example "&lt;extra&gt;{fullData.name}&lt;/extra&gt;". To hide the secondary box completely, use an empty tag `&lt;extra&gt;&lt;/extra&gt;`.</param>
     /// <param name="MultiHoverTemplate">Template string used for rendering the information that appear on hover box. Note that this will override `hoverinfo`. Variables are inserted using %{variable}, for example "y: %{y}" as well as %{xother}, {%_xother}, {%_xother_}, {%xother_}. When showing info for several points, "xother" will be added to those with different x positions from the first point. An underscore before or after "(x|y)other" will add a space on that side, only when this field is shown. Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. The variables available in `hovertemplate` are the ones emitted as event data described at this link https://plotly.com/javascript/plotlyjs-events/#event-data. Additionally, every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available. variable `norm` Anything contained in tag `&lt;extra&gt;` is displayed in the secondary box, for example "&lt;extra&gt;{fullData.name}&lt;/extra&gt;". To hide the secondary box completely, use an empty tag `&lt;extra&gt;&lt;/extra&gt;`.</param>
@@ -1567,6 +1683,7 @@ type Trace2DStyle() =
     /// <param name="YBins">Sets the binning across the y dimension</param>
     /// <param name="Marker">Sets the marker of this trace.</param>
     /// <param name="Line">Sets the line of this trace.</param>
+    /// <param name="TextFont">For this trace it only has an effect if `coloring` is set to "heatmap". Sets the text font of this trace.</param>
     /// <param name="ColorBar">Sets the colorbar of this trace.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `colorscale`. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="ColorScale">Sets the colorscale. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use`zmin` and `zmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
@@ -1589,14 +1706,18 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Z: seq<#seq<#IConvertible>>,
+            [<Optional; DefaultParameterValue(null)>] ?TextTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?HoverInfo: StyleParam.HoverInfo,
             [<Optional; DefaultParameterValue(null)>] ?HoverTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?MultiHoverTemplate: seq<string>,
@@ -1620,6 +1741,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?YBins: Bins,
             [<Optional; DefaultParameterValue(null)>] ?Marker: Marker,
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
+            [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?ColorScale: StyleParam.Colorscale,
@@ -1643,14 +1765,16 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt histogram2DContour "name"
             Visible |> DynObj.setValueOptBy histogram2DContour "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt histogram2DContour "showlegend"
+            Legend |> DynObj.setValueOptBy histogram2DContour "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt histogram2DContour "legendrank"
             LegendGroup |> DynObj.setValueOpt histogram2DContour "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt histogram2DContour "legendgrouptitle"
             Opacity |> DynObj.setValueOpt histogram2DContour "opacity"
             Ids |> DynObj.setValueOpt histogram2DContour "ids"
-            X |> DynObj.setValueOpt histogram2DContour "x"
-            Y |> DynObj.setValueOpt histogram2DContour "y"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt histogram2DContour "x"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt histogram2DContour "y"
             Z |> DynObj.setValueOpt histogram2DContour "z"
+            TextTemplate |> DynObj.setValueOpt histogram2DContour "texttemplate"
             HoverInfo |> DynObj.setValueOptBy histogram2DContour "hoverinfo" StyleParam.HoverInfo.convert
             (HoverTemplate, MultiHoverTemplate) |> DynObj.setSingleOrMultiOpt histogram2DContour "hovertemplate"
             XHoverFormat |> DynObj.setValueOpt histogram2DContour "xhoverformat"
@@ -1673,6 +1797,7 @@ type Trace2DStyle() =
             YBins |> DynObj.setValueOpt histogram2DContour "ybins"
             Marker |> DynObj.setValueOpt histogram2DContour "marker"
             Line |> DynObj.setValueOpt histogram2DContour "line"
+            TextFont |> DynObj.setValueOpt histogram2DContour "textfont"
             ColorBar |> DynObj.setValueOpt histogram2DContour "colorbar"
             AutoColorScale |> DynObj.setValueOpt histogram2DContour "autocolorscale"
             ColorScale |> DynObj.setValueOptBy histogram2DContour "colorscale" StyleParam.Colorscale.convert
@@ -1700,17 +1825,20 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="XType">If "array", the heatmap's x coordinates are given by "x" (the default behavior when `x` is provided). If "scaled", the heatmap's x coordinates are given by "x0" and "dx" (the default behavior when `x` is not provided).</param>
     /// <param name="XGap">Sets the horizontal gap (in pixels) between bricks.</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="YType">If "array", the heatmap's y coordinates are given by "y" (the default behavior when `y` is provided) If "scaled", the heatmap's y coordinates are given by "y0" and "dy" (the default behavior when `y` is not provided)</param>
@@ -1718,6 +1846,7 @@ type Trace2DStyle() =
     /// <param name="Z">Sets the z data.</param>
     /// <param name="Text">Sets the text elements associated with each z value.</param>
     /// <param name="MultiText">Sets the text elements associated with each z value.</param>
+    /// <param name="TextTemplate">Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
     /// <param name="HoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="MultiHoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="HoverInfo">Determines which trace information appear on hover. If `none` or `skip` are set, no information is displayed upon hovering. But, if `none` is set, click and hover events are still fired.</param>
@@ -1736,6 +1865,7 @@ type Trace2DStyle() =
     /// <param name="YPeriod">Only relevant when the axis `type` is "date". Sets the period positioning in milliseconds or "M&lt;n&gt;" on the y axis. Special values in the form of "M&lt;n&gt;" could be used to declare the number of months. In this case `n` must be a positive integer.</param>
     /// <param name="YPeriodAlignment">Only relevant when the axis `type` is "date". Sets the alignment of data points on the y axis.</param>
     /// <param name="YPeriod0">Only relevant when the axis `type` is "date". Sets the base for period positioning in milliseconds or date string on the y0 axis. When `y0period` is round number of weeks, the `y0period0` by default would be on a Sunday i.e. 2000-01-02, otherwise it would be at 2000-01-01.</param>
+    /// <param name="TextFont">Sets the text font of this trace.</param>
     /// <param name="ColorBar">Sets the colorbar of this trace.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `colorscale`. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="ColorScale">Sets the colorscale. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use`zmin` and `zmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
@@ -1759,17 +1889,20 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?XType: StyleParam.CoordinateType,
             [<Optional; DefaultParameterValue(null)>] ?XGap: int,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?YType: StyleParam.CoordinateType,
@@ -1777,6 +1910,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Z: seq<#seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Text: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?MultiText: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?TextTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?HoverText: string,
             [<Optional; DefaultParameterValue(null)>] ?MultiHoverText: seq<string>,
             [<Optional; DefaultParameterValue(null)>] ?HoverInfo: StyleParam.HoverInfo,
@@ -1795,6 +1929,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?YPeriod: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?YPeriodAlignment: StyleParam.PeriodAlignment,
             [<Optional; DefaultParameterValue(null)>] ?YPeriod0: #IConvertible,
+            [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?ColorScale: StyleParam.Colorscale,
@@ -1819,24 +1954,25 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt heatmap "name"
             Visible |> DynObj.setValueOptBy heatmap "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt heatmap "showlegend"
+            Legend |> DynObj.setValueOptBy heatmap "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt heatmap "legendrank"
             LegendGroup |> DynObj.setValueOpt heatmap "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt heatmap "legendgrouptitle"
             Opacity |> DynObj.setValueOpt heatmap "opacity"
             Ids |> DynObj.setValueOpt heatmap "ids"
-            X |> DynObj.setValueOpt heatmap "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt heatmap "x"
             X0 |> DynObj.setValueOpt heatmap "x0"
             DX |> DynObj.setValueOpt heatmap "dx"
             XType |> DynObj.setValueOptBy heatmap "xtype" StyleParam.CoordinateType.convert
             XGap |> DynObj.setValueOpt heatmap "xgap"
-            Y |> DynObj.setValueOpt heatmap "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt heatmap "y"
             Y0 |> DynObj.setValueOpt heatmap "y0"
             DY |> DynObj.setValueOpt heatmap "dy"
             YType |> DynObj.setValueOptBy heatmap "ytype" StyleParam.CoordinateType.convert
             YGap |> DynObj.setValueOpt heatmap "ygap"
             Z |> DynObj.setValueOpt heatmap "z"
-            Text |> DynObj.setValueOpt heatmap "text"
             (Text, MultiText) |> DynObj.setSingleOrMultiOpt heatmap "text"
+            TextTemplate |> DynObj.setValueOpt heatmap "texttemplate"
             (HoverText, MultiHoverText) |> DynObj.setSingleOrMultiOpt heatmap "hovertext"
             HoverInfo |> DynObj.setValueOptBy heatmap "hoverinfo" StyleParam.HoverInfo.convert
             (HoverTemplate, MultiHoverTemplate) |> DynObj.setSingleOrMultiOpt heatmap "hovertemplate"
@@ -1853,6 +1989,7 @@ type Trace2DStyle() =
             YPeriod |> DynObj.setValueOpt heatmap "yperiod"
             YPeriodAlignment |> DynObj.setValueOptBy heatmap "yperiodalignment" StyleParam.PeriodAlignment.convert
             YPeriod0 |> DynObj.setValueOpt heatmap "yperiod0"
+            TextFont |> DynObj.setValueOpt heatmap "textfont"
             ColorBar |> DynObj.setValueOpt heatmap "colorbar"
             AutoColorScale |> DynObj.setValueOpt heatmap "autocolorscale"
             ColorScale |> DynObj.setValueOptBy heatmap "colorscale" StyleParam.Colorscale.convert
@@ -1882,6 +2019,7 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -1915,6 +2053,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -1949,6 +2088,7 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt image "name"
             Visible |> DynObj.setValueOptBy image "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt image "showlegend"
+            Legend |> DynObj.setValueOptBy image "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt image "legendrank"
             LegendGroup |> DynObj.setValueOpt image "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt image "legendgrouptitle"
@@ -1984,22 +2124,26 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="X0">Alternate to `x`. Builds a linear space of x coordinates. Use with `dx` where `x0` is the starting coordinate and `dx` the step.</param>
     /// <param name="DX">Sets the x coordinate step. See `x0` for more info.</param>
     /// <param name="XType">If "array", the heatmap's x coordinates are given by "x" (the default behavior when `x` is provided). If "scaled", the heatmap's x coordinates are given by "x0" and "dx" (the default behavior when `x` is not provided).</param>
     /// <param name="Y">Sets the y coordinates.</param>
+    /// <param name="MultiY">Sets the y coordinates.</param>
     /// <param name="Y0">Alternate to `y`. Builds a linear space of y coordinates. Use with `dy` where `y0` is the starting coordinate and `dy` the step.</param>
     /// <param name="DY">Sets the y coordinate step. See `y0` for more info.</param>
     /// <param name="YType">If "array", the heatmap's y coordinates are given by "y" (the default behavior when `y` is provided) If "scaled", the heatmap's y coordinates are given by "y0" and "dy" (the default behavior when `y` is not provided)</param>
     /// <param name="Z">Sets the z data.</param>
     /// <param name="Text">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
     /// <param name="MultiText">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
+    /// <param name="TextTemplate">For this trace it only has an effect if `coloring` is set to "heatmap". Template string used for rendering the information text that appear on points. Note that this will override `textinfo`. Variables are inserted using %{variable}, for example "y: %{y}". Numbers are formatted using d3-format's syntax %{variable:d3-format}, for example "Price: %{y:$.2f}". https://github.com/d3/d3-format/tree/v1.4.5#d3-format for details on the formatting syntax. Dates are formatted using d3-time-format's syntax %{variable|d3-time-format}, for example "Day: %{2019-01-01|%A}". https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format for details on the date formatting syntax. Every attributes that can be specified per-point (the ones that are `arrayOk: true`) are available.</param>
     /// <param name="HoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="MultiHoverText">Sets hover text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. To be seen, trace `hoverinfo` must contain a "text" flag.</param>
     /// <param name="HoverInfo">Determines which trace information appear on hover. If `none` or `skip` are set, no information is displayed upon hovering. But, if `none` is set, click and hover events are still fired.</param>
@@ -2019,6 +2163,7 @@ type Trace2DStyle() =
     /// <param name="YPeriodAlignment">Only relevant when the axis `type` is "date". Sets the alignment of data points on the y axis.</param>
     /// <param name="YPeriod0">Only relevant when the axis `type` is "date". Sets the base for period positioning in milliseconds or date string on the y0 axis. When `y0period` is round number of weeks, the `y0period0` by default would be on a Sunday i.e. 2000-01-02, otherwise it would be at 2000-01-01.</param>
     /// <param name="Line">Sets the line of this trace.</param>
+    /// <param name="TextFont">For this trace it only has an effect if `coloring` is set to "heatmap". Sets the text font of this trace.</param>
     /// <param name="ColorBar">Sets the colorbar of this trace.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `colorscale`. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="ColorScale">Sets the colorscale. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use`zmin` and `zmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
@@ -2045,22 +2190,26 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?X0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DX: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?XType: StyleParam.CoordinateType,
             [<Optional; DefaultParameterValue(null)>] ?Y: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiY: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Y0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?DY: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?YType: StyleParam.CoordinateType,
             [<Optional; DefaultParameterValue(null)>] ?Z: seq<#seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Text: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?MultiText: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?TextTemplate: string,
             [<Optional; DefaultParameterValue(null)>] ?HoverText: string,
             [<Optional; DefaultParameterValue(null)>] ?MultiHoverText: seq<string>,
             [<Optional; DefaultParameterValue(null)>] ?HoverInfo: StyleParam.HoverInfo,
@@ -2080,6 +2229,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?YPeriodAlignment: StyleParam.PeriodAlignment,
             [<Optional; DefaultParameterValue(null)>] ?YPeriod0: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
+            [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?ColorScale: StyleParam.Colorscale,
@@ -2107,21 +2257,22 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt contour "name"
             Visible |> DynObj.setValueOptBy contour "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt contour "showlegend"
+            Legend |> DynObj.setValueOptBy contour "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt contour "legendrank"
             LegendGroup |> DynObj.setValueOpt contour "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt contour "legendgrouptitle"
             Opacity |> DynObj.setValueOpt contour "opacity"
             Ids |> DynObj.setValueOpt contour "ids"
-            X |> DynObj.setValueOpt contour "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt contour "x"
             X0 |> DynObj.setValueOpt contour "x0"
             DX |> DynObj.setValueOpt contour "dx"
             XType |> DynObj.setValueOptBy contour "xtype" StyleParam.CoordinateType.convert
-            Y |> DynObj.setValueOpt contour "y"
+            (Y, MultiY) |> DynObj.setSingleOrMultiOpt contour "y"
             Y0 |> DynObj.setValueOpt contour "y0"
             DY |> DynObj.setValueOpt contour "dy"
             YType |> DynObj.setValueOptBy contour "ytype" StyleParam.CoordinateType.convert
             Z |> DynObj.setValueOpt contour "z"
-            Text |> DynObj.setValueOpt contour "text"
+            TextTemplate |> DynObj.setValueOpt contour "texttemplate"
             (Text, MultiText) |> DynObj.setSingleOrMultiOpt contour "text"
             (HoverText, MultiHoverText) |> DynObj.setSingleOrMultiOpt contour "hovertext"
             HoverInfo |> DynObj.setValueOptBy contour "hoverinfo" StyleParam.HoverInfo.convert
@@ -2139,6 +2290,8 @@ type Trace2DStyle() =
             YPeriod |> DynObj.setValueOpt contour "yperiod"
             YPeriodAlignment |> DynObj.setValueOptBy contour "yperiodalignment" StyleParam.PeriodAlignment.convert
             YPeriod0 |> DynObj.setValueOpt contour "yperiod0"
+            Line |> DynObj.setValueOpt contour "line"
+            TextFont |> DynObj.setValueOpt contour "textfont"
             ColorBar |> DynObj.setValueOpt contour "colorbar"
             AutoColorScale |> DynObj.setValueOpt contour "autocolorscale"
             ColorScale |> DynObj.setValueOptBy contour "colorscale" StyleParam.Colorscale.convert
@@ -2171,12 +2324,14 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="Close">Sets the close values.</param>
     /// <param name="Open">Sets the open values.</param>
     /// <param name="High">Sets the high values.</param>
@@ -2211,12 +2366,14 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Close: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Open: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?High: seq<#IConvertible>,
@@ -2252,12 +2409,13 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt ohlc "name"
             Visible |> DynObj.setValueOptBy ohlc "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt ohlc "showlegend"
+            Legend |> DynObj.setValueOptBy ohlc "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt ohlc "legendrank"
             LegendGroup |> DynObj.setValueOpt ohlc "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt ohlc "legendgrouptitle"
             Opacity |> DynObj.setValueOpt ohlc "opacity"
             Ids |> DynObj.setValueOpt ohlc "ids"
-            X |> DynObj.setValueOpt ohlc "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt ohlc "x"
             Close |> DynObj.setValueOpt ohlc "close"
             Open |> DynObj.setValueOpt ohlc "open"
             High |> DynObj.setValueOpt ohlc "high"
@@ -2294,12 +2452,14 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
     /// <param name="Opacity">Sets the opacity of the trace.</param>
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="X">Sets the x coordinates.</param>
+    /// <param name="MultiX">Sets the x coordinates.</param>
     /// <param name="Close">Sets the close values.</param>
     /// <param name="Open">Sets the open values.</param>
     /// <param name="High">Sets the high values.</param>
@@ -2334,12 +2494,14 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
             [<Optional; DefaultParameterValue(null)>] ?Opacity: float,
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?X: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?MultiX: seq<seq<#IConvertible>>,
             [<Optional; DefaultParameterValue(null)>] ?Close: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Open: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?High: seq<#IConvertible>,
@@ -2375,12 +2537,13 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"
             Opacity |> DynObj.setValueOpt trace "opacity"
             Ids |> DynObj.setValueOpt trace "ids"
-            X |> DynObj.setValueOpt trace "x"
+            (X, MultiX) |> DynObj.setSingleOrMultiOpt trace "x"
             Close |> DynObj.setValueOpt trace "close"
             Open |> DynObj.setValueOpt trace "open"
             High |> DynObj.setValueOpt trace "high"
@@ -2416,6 +2579,7 @@ type Trace2DStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -2449,6 +2613,7 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -2473,8 +2638,8 @@ type Trace2DStyle() =
             [<Optional; DefaultParameterValue(null)>] ?ShowLowerHalf: bool,
             [<Optional; DefaultParameterValue(null)>] ?ShowUpperHalf: bool,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
             [<Optional; DefaultParameterValue(null)>] ?UIRevision: string
         ) =
@@ -2483,6 +2648,7 @@ type Trace2DStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"

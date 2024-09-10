@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\src\Plotly.NET\plotly-2.27.1.min.js" />
+    <EmbeddedResource Include="..\..\..\src\Plotly.NET\plotly-2.27.1.min.js.LICENSE.txt" />
+    <!--HTMLCodegen-->
+    <Compile Include="HTMLCodegen\Chart2D.fs" />
+    <Compile Include="HTMLCodegen\Chart3D.fs" />
+    <Compile Include="HTMLCodegen\ChartPolar.fs" />
+    <Compile Include="HTMLCodegen\ChartMap.fs" />
+    <Compile Include="HTMLCodegen\ChartTernary.fs" />
+    <Compile Include="HTMLCodegen\ChartCarpet.fs" />
+    <Compile Include="HTMLCodegen\ChartDomain.fs" />
+    <Compile Include="HTMLCodegen\ChartSmith.fs" />
+    <Compile Include="HTMLCodegen\SimpleTests.fs" />
+    <Compile Include="HTMLCodegen\ChartLayout.fs" />
+    <Compile Include="HTMLCodegen\MulticategoryData.fs" />
+    <!--JSONGen-->
+    <Compile Include="JSONGen\Chart2D.fs" />
+    <!--Misc-->
+    <Compile Include="ChartAPIs\WithAxis.fs" />
+    <Compile Include="ChartAPIs\Combine.fs" />
+    <Compile Include="CommonAbstractions\StyleParams.fs" />
+    <Compile Include="CommonAbstractions\Colors.fs" />
+    <Compile Include="LayoutObjects\Layout.fs" />
+    <Compile Include="LayoutObjects\Slider.fs" />
+    <Compile Include="LayoutObjects\LinearAxis.fs" />
+    <Compile Include="ConfigObjects\Config.fs" />
+    <Compile Include="DisplayOptions\DisplayOptions.fs" />
+    <Compile Include="Traces\TraceStaticMembers.fs" />
+    <Compile Include="Traces\TraceStyle.fs" />
+    <Compile Include="Traces\TraceID.fs" />
+    <Compile Include="UpstreamFeatures\2.27.fs" />
+    <Compile Include="UpstreamFeatures\2.26.fs" />
+    <Compile Include="UpstreamFeatures\2.25.fs" />
+    <Compile Include="UpstreamFeatures\2.24.fs" />
+    <Compile Include="UpstreamFeatures\2.23.fs" />
+    <Compile Include="UpstreamFeatures\2.22.fs" />
+    <Compile Include="UpstreamFeatures\2.21.fs" />
+    <Compile Include="UpstreamFeatures\2.20.fs" />
+    <Compile Include="UpstreamFeatures\2.19.fs" />
+    <Compile Include="FeatureAdditions\Fix_3d_GridPosition.fs" />
+    <Compile Include="FeatureAdditions\Grid_SubPlotTitles.fs" />
+    <Compile Include="FeatureAdditions\Fix_HoverInfo.fs" />
+    <Compile Include="FeatureAdditions\UpdateMenuButton_Args.fs" />
+    <Compile Include="FeatureAdditions\Accessible_Contours.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--<PackageReference Update="FSharp.Core" Version="7.*" />-->
+    <PackageReference Include="Deedle" Version="2.4.1" />
+    <PackageReference Include="Expecto" Version="10.*" />
+    <PackageReference Include="FSharp.Data" Version="4.2.0" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Plotly.NET\Plotly.NET.fsproj" />
+    <ProjectReference Include="..\..\Common\FSharpTestBase\FSharpTestBase.fsproj" />
+  </ItemGroup>
+</Project>

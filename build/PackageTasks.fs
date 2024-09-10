@@ -11,7 +11,7 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO.Globbing.Operators
 
-let pack = BuildTask.create "Pack" [ clean; build; runTests ] {
+let pack = BuildTask.create "Pack" [ clean; build; runTestsAll ] {
     projects
     |> List.iter (fun pInfo ->
         if promptYesNo $"creating stable package for {pInfo.Name}{System.Environment.NewLine}\tpackage version: {pInfo.PackageVersionTag}{System.Environment.NewLine}\tassembly version: {pInfo.AssemblyVersion}{System.Environment.NewLine}\tassembly informational version: {pInfo.AssemblyInformationalVersion}{System.Environment.NewLine} OK?" then
@@ -30,6 +30,7 @@ let pack = BuildTask.create "Pack" [ clean; build; runTests ] {
                                     "TargetsForTfmSpecificContentInPackage", "" //https://github.com/dotnet/fsharp/issues/12320
                                     ]
                                     @ p.MSBuildParams.Properties)
+                            DisableInternalBinLog = true
                         }
                     | _ ->
                         { p.MSBuildParams with
@@ -41,6 +42,7 @@ let pack = BuildTask.create "Pack" [ clean; build; runTests ] {
                                     "TargetsForTfmSpecificContentInPackage", "" //https://github.com/dotnet/fsharp/issues/12320
                                     ]
                                     @ p.MSBuildParams.Properties)
+                            DisableInternalBinLog = true
                         }
                         
 
@@ -49,7 +51,7 @@ let pack = BuildTask.create "Pack" [ clean; build; runTests ] {
                     OutputPath = Some pkgDir
                     NoBuild = true
                 }
-                |> DotNet.Options.withCustomParams (Some "--no-dependencies")
+                |> DotNet.Options.withCustomParams (Some "--no-dependencies -tl")
             )
         else
             failwith "aborted"
@@ -60,13 +62,15 @@ let packPrerelease =
     BuildTask.create
         "PackPrerelease"
         [
-            setPrereleaseTag
             clean
             build
-            runTests
+            runTestsAll
         ] {
         projects
         |> List.iter (fun pInfo ->
+            printfn $"Please enter pre-release package suffix for {pInfo.Name}"
+            let prereleaseSuffix = System.Console.ReadLine()
+            pInfo.PackagePrereleaseTag <- sprintf "%s-%s" pInfo.PackageVersionTag prereleaseSuffix
             if promptYesNo $"creating prerelease package for {pInfo.Name}{System.Environment.NewLine}\tpackage version: {pInfo.PackagePrereleaseTag}{System.Environment.NewLine}\tassembly version: {pInfo.AssemblyVersion}{System.Environment.NewLine}\tassembly informational version: {pInfo.AssemblyInformationalVersion}{System.Environment.NewLine} OK?" then
                 pInfo.ProjFile
                 |> Fake.DotNet.DotNet.pack (fun p ->
@@ -82,6 +86,7 @@ let packPrerelease =
                                         "PackageReleaseNotes",  (r.Notes |> String.concat "\r\n")
                                         "TargetsForTfmSpecificContentInPackage", "" //https://github.com/dotnet/fsharp/issues/12320
                                         ])
+                                DisableInternalBinLog = true
                             }
                         | _ -> 
                             { p.MSBuildParams with
@@ -92,6 +97,7 @@ let packPrerelease =
                                         "InformationalVersion", pInfo.AssemblyInformationalVersion
                                         "TargetsForTfmSpecificContentInPackage", "" //https://github.com/dotnet/fsharp/issues/12320
                                         ])
+                                DisableInternalBinLog = true
                             }
 
                     { p with
@@ -100,7 +106,7 @@ let packPrerelease =
                         MSBuildParams = msBuildParams
                         NoBuild = true
                     }
-                    |> DotNet.Options.withCustomParams (Some "--no-dependencies")
+                    |> DotNet.Options.withCustomParams (Some "--no-dependencies  -tl")
                 )
             else
                 failwith "aborted"

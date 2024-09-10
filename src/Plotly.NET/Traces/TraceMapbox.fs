@@ -56,6 +56,7 @@ type TraceMapboxStyle() =
     /// </summary>
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -65,6 +66,7 @@ type TraceMapboxStyle() =
     /// <param name="Ids">Assigns id labels to each datum. These ids for object constancy of data points during animation. Should be an array of strings, not numbers or any other type.</param>
     /// <param name="Lat">Sets the latitude coordinates (in degrees North).</param>
     /// <param name="Lon">Sets the longitude coordinates (in degrees East).</param>
+    /// <param name="Cluster">Sets the clustering options for points on this trace.</param>
     /// <param name="Text">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
     /// <param name="MultiText">Sets text elements associated with each (x,y) pair. If a single string, the same string appears over all the data points. If an array of string, the items are mapped in order to the this trace's (x,y) coordinates. If trace `hoverinfo` contains a "text" flag and "hovertext" is not set, these elements will be seen in the hover labels.</param>
     /// <param name="TextPosition">Sets the positions of the `text` elements with respects to the (x,y) coordinates.</param>
@@ -96,6 +98,7 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -104,6 +107,7 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Ids: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?Lat: #IConvertible seq,
             [<Optional; DefaultParameterValue(null)>] ?Lon: #IConvertible seq,
+            [<Optional; DefaultParameterValue(null)>] ?Cluster: MapboxCluster,
             [<Optional; DefaultParameterValue(null)>] ?Text: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?MultiText: seq<#IConvertible>,
             [<Optional; DefaultParameterValue(null)>] ?TextPosition: StyleParam.TextPosition,
@@ -122,8 +126,8 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Line: Line,
             [<Optional; DefaultParameterValue(null)>] ?TextFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?Below: string,
             [<Optional; DefaultParameterValue(null)>] ?ConnectGaps: bool,
             [<Optional; DefaultParameterValue(null)>] ?Fill: StyleParam.Fill,
@@ -144,6 +148,7 @@ type TraceMapboxStyle() =
             Ids |> DynObj.setValueOpt trace "ids"
             Lat |> DynObj.setValueOpt trace "lat"
             Lon |> DynObj.setValueOpt trace "lon"
+            Cluster |> DynObj.setValueOpt trace "cluster"
             (Text, MultiText) |> DynObj.setSingleOrMultiOpt trace "text"
 
             (TextPosition, MultiTextPosition)
@@ -177,6 +182,7 @@ type TraceMapboxStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -217,6 +223,7 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -247,8 +254,8 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Zmid: float,
             [<Optional; DefaultParameterValue(null)>] ?Zmin: float,
             [<Optional; DefaultParameterValue(null)>] ?SelectedPoints: seq<#IConvertible>,
-            [<Optional; DefaultParameterValue(null)>] ?Selected: Selection,
-            [<Optional; DefaultParameterValue(null)>] ?Unselected: Selection,
+            [<Optional; DefaultParameterValue(null)>] ?Selected: TraceSelection,
+            [<Optional; DefaultParameterValue(null)>] ?Unselected: TraceSelection,
             [<Optional; DefaultParameterValue(null)>] ?Below: string,
             [<Optional; DefaultParameterValue(null)>] ?HoverLabel: Hoverlabel,
             [<Optional; DefaultParameterValue(null)>] ?UIRevision: string
@@ -300,6 +307,7 @@ type TraceMapboxStyle() =
     /// <param name="Name">Sets the trace name. The trace name appear as the legend item and on hover.</param>
     /// <param name="Visible">Determines whether or not this trace is visible. If "legendonly", the trace is not drawn, but can appear as a legend item (provided that the legend itself is visible).</param>
     /// <param name="ShowLegend">Determines whether or not an item corresponding to this trace is shown in the legend.</param>
+    /// <param name="Legend">Sets the reference to a legend to show this trace in. References to these legends are "legend", "legend2", "legend3", etc. Settings for these legends are set in the layout, under `layout.legend`, `layout.legend2`, etc.</param>
     /// <param name="LegendRank">Sets the legend rank for this trace. Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for this trace. Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
     /// <param name="LegendGroupTitle">Sets the legend group title for this trace.</param>
@@ -338,6 +346,7 @@ type TraceMapboxStyle() =
             [<Optional; DefaultParameterValue(null)>] ?Name: string,
             [<Optional; DefaultParameterValue(null)>] ?Visible: StyleParam.Visible,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Legend: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?LegendRank: int,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroup: string,
             [<Optional; DefaultParameterValue(null)>] ?LegendGroupTitle: Title,
@@ -377,6 +386,7 @@ type TraceMapboxStyle() =
             Name |> DynObj.setValueOpt trace "name"
             Visible |> DynObj.setValueOptBy trace "visible" StyleParam.Visible.convert
             ShowLegend |> DynObj.setValueOpt trace "showlegend"
+            Legend |> DynObj.setValueOptBy trace "legend" StyleParam.SubPlotId.convert
             LegendRank |> DynObj.setValueOpt trace "legendrank"
             LegendGroup |> DynObj.setValueOpt trace "legendgroup"
             LegendGroupTitle |> DynObj.setValueOpt trace "legendgrouptitle"

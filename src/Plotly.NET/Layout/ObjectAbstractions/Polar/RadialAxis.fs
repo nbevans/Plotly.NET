@@ -16,6 +16,7 @@ type RadialAxis() =
     /// <param name="AxisType">Sets the angular axis type. If "linear", set `thetaunit` to determine the unit in which axis value are shown. If "category, use `period` to set the number of integer coordinates around polar axis.</param>
     /// <param name="AutoTypeNumbers">Using "strict" a numeric string in trace data is not converted to a number. Using "convert types" a numeric string in trace data may be treated as a number during automatic axis `type` detection. Defaults to layout.autotypenumbers.</param>
     /// <param name="AutoRange">Determines whether or not the range of this axis is computed in relation to the input data. See `rangemode` for more info. If `range` is provided, then `autorange` is set to "false".</param>
+    /// <param name="AutoRangeOptions">Additional options for bounding the autorange</param>
     /// <param name="RangeMode">If "tozero"`, the range extends to 0, regardless of the input data If "nonnegative", the range is non-negative, regardless of the input data. If "normal", the range is computed in relation to the extrema of the input data (same behavior as for cartesian axes).</param>
     /// <param name="Range">Sets the range of this axis. If the axis `type` is "log", then you must take the log of your desired range (e.g. to set the range from 1 to 100, set the range from 0 to 2). If the axis `type` is "date", it should be date strings, like date data, though Date objects and unix milliseconds will be accepted and converted to strings. If the axis `type` is "category", it should be numbers, using the scale where each category is assigned a serial number from zero in the order it appears.</param>
     /// <param name="CategoryOrder">Specifies the ordering logic for the case of categorical variables. By default, plotly uses "trace", which specifies the order that is present in the data supplied. Set `categoryorder` to "category ascending" or "category descending" if order should be determined by the alphanumerical order of the category names. Set `categoryorder` to "array" to derive the ordering from the attribute `categoryarray`. If a category is not found in the `categoryarray` array, the sorting behavior for that attribute will be identical to the "trace" mode. The unspecified categories will follow the categories in `categoryarray`. Set `categoryorder` to "total ascending" or "total descending" if order should be determined by the numerical order of the values. Similarly, the order can be determined by the min, max, sum, mean or median of all the values.</param>
@@ -29,8 +30,11 @@ type RadialAxis() =
     /// <param name="ShowLine">Determines whether or not a line bounding this axis is drawn.</param>
     /// <param name="LineColor">Sets the axis line color.</param>
     /// <param name="LineWidth">Sets the width (in px) of the axis line.</param>
+    /// <param name="MaxAllowed">Determines the maximum range of this axis.</param>
+    /// <param name="MinAllowed">Determines the minimum range of this axis.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="GridWidth">Sets the width (in px) of the grid lines.</param>
     /// <param name="TickMode">Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `TickVals` and the tick text is `TickText`. ("array" is the default value if `TickVals` is provided).</param>
     /// <param name="NTicks">Specifies the maximum number of ticks for the particular axis. The actual number of ticks will be chosen automatically to be less than or equal to `nticks`. Has an effect only if `tickmode` is set to "auto".</param>
@@ -55,7 +59,9 @@ type RadialAxis() =
     /// <param name="TickAngle">Sets the angle of the tick labels with respect to the horizontal. For example, a `tickangle` of -90 draws the tick labels vertically.</param>
     /// <param name="TickFormat">Sets the tick label formatting rule using d3 formatting mini-languages which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format. And for dates see: https://github.com/d3/d3-time-format#locale_format. We add two items to d3's date formatter: "%h" for half of the year as a decimal number as well as "%{n}f" for fractional seconds with n digits. For example, "2016-10-13 09:15:23.456" with TickFormat "%H~%M~%S.%2f" would display "09~15~23.46"</param>
     /// <param name="TickFormatStops">Set rules for customizing TickFormat on different zoom levels</param>
+    /// <param name="LabelAlias">Replacement text for specific tick or hover labels. For example using {US: 'USA', CA: 'Canada'} changes US to USA and CA to Canada. The labels we would have shown must match the keys exactly, after adding any tickprefix or ticksuffix. labelalias can be used with any axis type, and both keys (if needed) and values (if desired) can include html-like tags or MathJax.</param>
     /// <param name="Layer">Sets the layer on which this axis is displayed. If "above traces", this axis is displayed above all the subplot's traces If "below traces", this axis is displayed below all the subplot's traces, but above the grid lines. Useful when used together with scatter-like traces with `cliponaxis` set to "false" to show markers and/or text nodes above this axis.</param>
+    /// <param name="TickLabelStep">Sets the spacing between tick labels as compared to the spacing between ticks. A value of 1 (default) means each tick gets a label. A value of 2 means shows every 2nd label. A larger value n means only every nth tick is labeled. `tick0` determines which labels are shown. Not implemented for axes with `type` "log" or "multicategory", or when `tickmode` is "array".</param>
     /// <param name="Calendar">Sets the calendar system to use for `range` and `tick0` if this is a date axis. This does not set the calendar for interpreting data on this axis, that's specified in the trace or via the global `layout.calendar`</param>
     static member init
         (
@@ -63,6 +69,7 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?AxisType: StyleParam.AxisType,
             [<Optional; DefaultParameterValue(null)>] ?AutoTypeNumbers: StyleParam.AutoTypeNumbers,
             [<Optional; DefaultParameterValue(null)>] ?AutoRange: StyleParam.AutoRange,
+            [<Optional; DefaultParameterValue(null)>] ?AutoRangeOptions: AutoRangeOptions,
             [<Optional; DefaultParameterValue(null)>] ?RangeMode: StyleParam.RangeMode,
             [<Optional; DefaultParameterValue(null)>] ?Range: StyleParam.Range,
             [<Optional; DefaultParameterValue(null)>] ?CategoryOrder: StyleParam.CategoryOrder,
@@ -76,8 +83,11 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?ShowLine: bool,
             [<Optional; DefaultParameterValue(null)>] ?LineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?LineWidth: int,
+            [<Optional; DefaultParameterValue(null)>] ?MaxAllowed: #IConvertible,
+            [<Optional; DefaultParameterValue(null)>] ?MinAllowed: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?GridWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?TickMode: StyleParam.TickMode,
             [<Optional; DefaultParameterValue(null)>] ?NTicks: int,
@@ -102,7 +112,9 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?TickAngle: int,
             [<Optional; DefaultParameterValue(null)>] ?TickFormat: string,
             [<Optional; DefaultParameterValue(null)>] ?TickFormatStops: seq<TickFormatStop>,
+            [<Optional; DefaultParameterValue(null)>] ?LabelAlias: DynamicObj,
             [<Optional; DefaultParameterValue(null)>] ?Layer: StyleParam.Layer,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelStep: int,
             [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar
         ) =
         RadialAxis()
@@ -111,6 +123,7 @@ type RadialAxis() =
             ?AxisType = AxisType,
             ?AutoTypeNumbers = AutoTypeNumbers,
             ?AutoRange = AutoRange,
+            ?AutoRangeOptions = AutoRangeOptions,
             ?RangeMode = RangeMode,
             ?Range = Range,
             ?CategoryOrder = CategoryOrder,
@@ -124,8 +137,11 @@ type RadialAxis() =
             ?ShowLine = ShowLine,
             ?LineColor = LineColor,
             ?LineWidth = LineWidth,
+            ?MaxAllowed = MaxAllowed,
+            ?MinAllowed = MinAllowed,
             ?ShowGrid = ShowGrid,
             ?GridColor = GridColor,
+            ?GridDash = GridDash,
             ?GridWidth = GridWidth,
             ?TickMode = TickMode,
             ?NTicks = NTicks,
@@ -150,7 +166,9 @@ type RadialAxis() =
             ?TickAngle = TickAngle,
             ?TickFormat = TickFormat,
             ?TickFormatStops = TickFormatStops,
+            ?LabelAlias = LabelAlias,
             ?Layer = Layer,
+            ?TickLabelStep = TickLabelStep,
             ?Calendar = Calendar
         )
 
@@ -161,6 +179,7 @@ type RadialAxis() =
     /// <param name="AxisType">Sets the angular axis type. If "linear", set `thetaunit` to determine the unit in which axis value are shown. If "category, use `period` to set the number of integer coordinates around polar axis.</param>
     /// <param name="AutoTypeNumbers">Using "strict" a numeric string in trace data is not converted to a number. Using "convert types" a numeric string in trace data may be treated as a number during automatic axis `type` detection. Defaults to layout.autotypenumbers.</param>
     /// <param name="AutoRange">Determines whether or not the range of this axis is computed in relation to the input data. See `rangemode` for more info. If `range` is provided, then `autorange` is set to "false".</param>
+    /// <param name="AutoRangeOptions">Additional options for bounding the autorange</param>
     /// <param name="RangeMode">If "tozero"`, the range extends to 0, regardless of the input data If "nonnegative", the range is non-negative, regardless of the input data. If "normal", the range is computed in relation to the extrema of the input data (same behavior as for cartesian axes).</param>
     /// <param name="Range">Sets the range of this axis. If the axis `type` is "log", then you must take the log of your desired range (e.g. to set the range from 1 to 100, set the range from 0 to 2). If the axis `type` is "date", it should be date strings, like date data, though Date objects and unix milliseconds will be accepted and converted to strings. If the axis `type` is "category", it should be numbers, using the scale where each category is assigned a serial number from zero in the order it appears.</param>
     /// <param name="CategoryOrder">Specifies the ordering logic for the case of categorical variables. By default, plotly uses "trace", which specifies the order that is present in the data supplied. Set `categoryorder` to "category ascending" or "category descending" if order should be determined by the alphanumerical order of the category names. Set `categoryorder` to "array" to derive the ordering from the attribute `categoryarray`. If a category is not found in the `categoryarray` array, the sorting behavior for that attribute will be identical to the "trace" mode. The unspecified categories will follow the categories in `categoryarray`. Set `categoryorder` to "total ascending" or "total descending" if order should be determined by the numerical order of the values. Similarly, the order can be determined by the min, max, sum, mean or median of all the values.</param>
@@ -174,8 +193,11 @@ type RadialAxis() =
     /// <param name="ShowLine">Determines whether or not a line bounding this axis is drawn.</param>
     /// <param name="LineColor">Sets the axis line color.</param>
     /// <param name="LineWidth">Sets the width (in px) of the axis line.</param>
+    /// <param name="MaxAllowed">Determines the maximum range of this axis.</param>
+    /// <param name="MinAllowed">Determines the minimum range of this axis.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="GridWidth">Sets the width (in px) of the grid lines.</param>
     /// <param name="TickMode">Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `TickVals` and the tick text is `TickText`. ("array" is the default value if `TickVals` is provided).</param>
     /// <param name="NTicks">Specifies the maximum number of ticks for the particular axis. The actual number of ticks will be chosen automatically to be less than or equal to `nticks`. Has an effect only if `tickmode` is set to "auto".</param>
@@ -200,7 +222,9 @@ type RadialAxis() =
     /// <param name="TickAngle">Sets the angle of the tick labels with respect to the horizontal. For example, a `tickangle` of -90 draws the tick labels vertically.</param>
     /// <param name="TickFormat">Sets the tick label formatting rule using d3 formatting mini-languages which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format. And for dates see: https://github.com/d3/d3-time-format#locale_format. We add two items to d3's date formatter: "%h" for half of the year as a decimal number as well as "%{n}f" for fractional seconds with n digits. For example, "2016-10-13 09:15:23.456" with TickFormat "%H~%M~%S.%2f" would display "09~15~23.46"</param>
     /// <param name="TickFormatStops">Set rules for customizing TickFormat on different zoom levels</param>
+    /// <param name="LabelAlias">Replacement text for specific tick or hover labels. For example using {US: 'USA', CA: 'Canada'} changes US to USA and CA to Canada. The labels we would have shown must match the keys exactly, after adding any tickprefix or ticksuffix. labelalias can be used with any axis type, and both keys (if needed) and values (if desired) can include html-like tags or MathJax.</param>
     /// <param name="Layer">Sets the layer on which this axis is displayed. If "above traces", this axis is displayed above all the subplot's traces If "below traces", this axis is displayed below all the subplot's traces, but above the grid lines. Useful when used together with scatter-like traces with `cliponaxis` set to "false" to show markers and/or text nodes above this axis.</param>
+    /// <param name="TickLabelStep">Sets the spacing between tick labels as compared to the spacing between ticks. A value of 1 (default) means each tick gets a label. A value of 2 means shows every 2nd label. A larger value n means only every nth tick is labeled. `tick0` determines which labels are shown. Not implemented for axes with `type` "log" or "multicategory", or when `tickmode` is "array".</param>
     /// <param name="Calendar">Sets the calendar system to use for `range` and `tick0` if this is a date axis. This does not set the calendar for interpreting data on this axis, that's specified in the trace or via the global `layout.calendar`</param>
     static member style
         (
@@ -208,6 +232,7 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?AxisType: StyleParam.AxisType,
             [<Optional; DefaultParameterValue(null)>] ?AutoTypeNumbers: StyleParam.AutoTypeNumbers,
             [<Optional; DefaultParameterValue(null)>] ?AutoRange: StyleParam.AutoRange,
+            [<Optional; DefaultParameterValue(null)>] ?AutoRangeOptions: AutoRangeOptions,
             [<Optional; DefaultParameterValue(null)>] ?RangeMode: StyleParam.RangeMode,
             [<Optional; DefaultParameterValue(null)>] ?Range: StyleParam.Range,
             [<Optional; DefaultParameterValue(null)>] ?CategoryOrder: StyleParam.CategoryOrder,
@@ -221,8 +246,11 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?ShowLine: bool,
             [<Optional; DefaultParameterValue(null)>] ?LineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?LineWidth: int,
+            [<Optional; DefaultParameterValue(null)>] ?MaxAllowed: #IConvertible,
+            [<Optional; DefaultParameterValue(null)>] ?MinAllowed: #IConvertible,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?GridWidth: int,
             [<Optional; DefaultParameterValue(null)>] ?TickMode: StyleParam.TickMode,
             [<Optional; DefaultParameterValue(null)>] ?NTicks: int,
@@ -247,7 +275,9 @@ type RadialAxis() =
             [<Optional; DefaultParameterValue(null)>] ?TickAngle: int,
             [<Optional; DefaultParameterValue(null)>] ?TickFormat: string,
             [<Optional; DefaultParameterValue(null)>] ?TickFormatStops: seq<TickFormatStop>,
+            [<Optional; DefaultParameterValue(null)>] ?LabelAlias: DynamicObj,
             [<Optional; DefaultParameterValue(null)>] ?Layer: StyleParam.Layer,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelStep: int,
             [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar
         ) =
         fun (radialAxis: RadialAxis) ->
@@ -256,6 +286,7 @@ type RadialAxis() =
             AxisType |> DynObj.setValueOptBy radialAxis "type" StyleParam.AxisType.convert
             AutoTypeNumbers |> DynObj.setValueOptBy radialAxis "autotypenumbers" StyleParam.AutoTypeNumbers.convert
             AutoRange |> DynObj.setValueOptBy radialAxis "autorange" StyleParam.AutoRange.convert
+            AutoRangeOptions |> DynObj.setValueOpt radialAxis "autorangeoptions"
             RangeMode |> DynObj.setValueOptBy radialAxis "rangemode" StyleParam.RangeMode.convert
             Range |> DynObj.setValueOptBy radialAxis "range" StyleParam.Range.convert
             CategoryOrder |> DynObj.setValueOptBy radialAxis "categoryorder" StyleParam.CategoryOrder.convert
@@ -269,8 +300,11 @@ type RadialAxis() =
             ShowLine |> DynObj.setValueOpt radialAxis "showline"
             LineColor |> DynObj.setValueOpt radialAxis "linecolor"
             LineWidth |> DynObj.setValueOpt radialAxis "linewidth"
+            MaxAllowed |> DynObj.setValueOpt radialAxis "maxallowed"
+            MinAllowed |> DynObj.setValueOpt radialAxis "minallowed"
             ShowGrid |> DynObj.setValueOpt radialAxis "showgrid"
             GridColor |> DynObj.setValueOpt radialAxis "gridcolor"
+            GridDash |> DynObj.setValueOptBy radialAxis "griddash" StyleParam.DrawingStyle.convert
             GridWidth |> DynObj.setValueOpt radialAxis "gridwidth"
             TickMode |> DynObj.setValueOptBy radialAxis "tickmode" StyleParam.TickMode.convert
             NTicks |> DynObj.setValueOpt radialAxis "nticks"
@@ -295,7 +329,9 @@ type RadialAxis() =
             TickAngle |> DynObj.setValueOpt radialAxis "tickangle"
             TickFormat |> DynObj.setValueOpt radialAxis "tickformat"
             TickFormatStops |> DynObj.setValueOpt radialAxis "tickformatstops"
+            LabelAlias |> DynObj.setValueOpt radialAxis "labelalias"
             Layer |> DynObj.setValueOptBy radialAxis "layer" StyleParam.Layer.convert
+            TickLabelStep |> DynObj.setValueOpt radialAxis "ticklabelstep"
             Calendar |> DynObj.setValueOptBy radialAxis "calendar" StyleParam.Calendar.convert
 
             radialAxis

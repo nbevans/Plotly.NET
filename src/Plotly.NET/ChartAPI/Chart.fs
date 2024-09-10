@@ -7,8 +7,7 @@ open Plotly.NET.ConfigObjects
 open DynamicObj
 open System
 open System.IO
-
-open GenericChart
+open Giraffe.ViewEngine
 open System.Runtime.InteropServices
 
 /// Provides a set of static methods for creating and styling charts.
@@ -23,7 +22,7 @@ type Chart =
     /// Optionally opens the generated file in the browser.
     /// </summary>
     /// <param name="path">The path to save the chart html at.</param>
-    /// <param name="OpenInBrowser">Wether or not to open the generated file in the browser (default: false)</param>
+    /// <param name="OpenInBrowser">Whether or not to open the generated file in the browser (default: false)</param>
     [<CompiledName("SaveHtml")>]
     static member saveHtml(path: string, [<Optional; DefaultParameterValue(null)>] ?OpenInBrowser: bool) =
         fun (ch: GenericChart) ->
@@ -38,7 +37,9 @@ type Chart =
                     path + ".html"
 
             File.WriteAllText(file, html)
-            if show then file |> openOsSpecificFile
+
+            if show then
+                file |> openOsSpecificFile
 
     /// <summary>
     /// Saves the given chart as a temporary html file and opens it in the browser.
@@ -51,33 +52,6 @@ type Chart =
         let file = sprintf "%s.html" guid
         let path = Path.Combine(tempPath, file)
         ch |> Chart.saveHtml (path, true)
-
-    /// <summary>
-    /// Saves the given chart as a temporary html file containing a static image of the chart and opens it in the browser.
-    ///
-    /// IMPORTANT: this is not the same as static image generation. The file still needs to be opened in the browser to generate the image, as it is done via a js script in the html.
-    ///
-    /// For real programmatic static image export use Plotly.NET.ImageExport (https://www.nuget.org/packages/Plotly.NET.ImageExport/)
-    ///
-    /// This yields basically the same results as using `StaticPlot = true` for the chart's config.
-    /// </summary>
-    /// <param name="format">The image format for the static chart</param>
-    /// <param name="ch">The chart to show in the browser</param>
-    [<Obsolete("This function will be dropped in the 2.0 release. It is recommended to either create static plots or use Plotly.NET.ImageExport instead.")>]
-    [<CompiledName("ShowAsImage")>]
-    static member showAsImage (format: StyleParam.ImageFormat) (ch: GenericChart) =
-        let guid = Guid.NewGuid().ToString()
-        let tempPath = Path.GetTempPath()
-        let file = sprintf "%s.html" guid
-        let path = Path.Combine(tempPath, file)
-
-        let html =
-            ch
-            |> Chart.withAdditionalHeadTags [ """<script src="https://unpkg.com/@plotly/d3@3.8.0/d3.js"></script>""" ]
-            |> GenericChart.toEmbeddedImage format
-
-        File.WriteAllText(path, html)
-        path |> openOsSpecificFile
 
     // #######################
     /// Create a combined chart with the given charts merged
@@ -110,7 +84,7 @@ type Chart =
     /// Sets trace information on the given chart.
     /// </summary>
     /// <param name="Name">Sets the name of the chart's trace(s). When the chart is a multichart (it contains multiple traces), the name is suffixed by '_%i' where %i is the index of the trace.</param>
-    /// <param name="Visible">Wether or not the chart's traces are visible</param>
+    /// <param name="Visible">Whether or not the chart's traces are visible</param>
     /// <param name="ShowLegend">Determines whether or not item(s) corresponding to this chart's trace(s) is/are shown in the legend.</param>
     /// <param name="LegendRank">Sets the legend rank for the chart's trace(s). Items and groups with smaller ranks are presented on top/left side while with `"reversed" `legend.traceorder` they are on bottom/right side. The default legendrank is 1000, so that you can use ranks less than 1000 to place certain items before all unranked items, and ranks greater than 1000 to go after all unranked items.</param>
     /// <param name="LegendGroup">Sets the legend group for the chart's trace(s). Traces part of the same legend group hide/show at the same time when toggling legend items.</param>
@@ -127,7 +101,7 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapiTrace (fun i trace ->
+            |> GenericChart.mapiTrace (fun i trace ->
                 let naming i name =
                     name |> Option.map (fun v -> if i = 0 then v else sprintf "%s_%i" v i)
 
@@ -163,7 +137,7 @@ type Chart =
 
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (fun trace ->
+            |> GenericChart.mapTrace (fun trace ->
                 match trace with
                 | :? Trace2D as trace -> trace |> Trace2DStyle.SetAxisAnchor(?X = idx, ?Y = idy) :> Trace
                 | :? TraceCarpet as trace when trace.``type`` = "carpet" ->
@@ -178,13 +152,21 @@ type Chart =
     /// <param name="id">The new color axis id for the chart's trace(s)</param>
     [<CompiledName("WithColorAxisAnchor")>]
     static member withColorAxisAnchor(id: int) =
-        fun (ch: GenericChart) -> ch |> mapTrace (Trace.setColorAxisAnchor id)
+        fun (ch: GenericChart) -> ch |> GenericChart.mapTrace (Trace.setColorAxisAnchor id)
+
+    /// <summary>
+    /// Sets the legend id for the chart's trace(s).
+    /// </summary>
+    /// <param name="id">The new Legend id for the chart's trace(s)</param>
+    [<CompiledName("WithLegendAnchor")>]
+    static member withLegendAnchor(id: int) =
+        fun (ch: GenericChart) -> ch |> GenericChart.mapTrace (Trace.setLegendAnchor id)
 
     /// <summary>
     /// Sets the marker for the chart's trace(s).
     /// </summary>
     /// <param name="marker">The new marker for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already a marker (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already a marker (default is false)</param>
     [<CompiledName("SetMarker")>]
     static member setMarker(marker: Marker, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -208,6 +190,8 @@ type Chart =
     /// <summary>
     /// Applies the given styles to the marker object(s) of the chart's trace(s). Overwrites attributes with the same name that are already set.
     /// </summary>
+    /// <param name="Angle">Sets the marker angle in respect to `angleref`.</param>
+    /// <param name="AngleRef">Sets the reference for marker angle. With "previous", angle 0 points along the line from the previous point to this one. With "up", angle 0 points toward the top of the screen.</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `marker.colorscale`. Has an effect only if in `marker.color`is set to a numerical array. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="CAuto">Determines whether or not the color domain is computed with respect to the input data (here in `marker.color`) or the bounds set in `marker.cmin` and `marker.cmax` Has an effect only if in `marker.color`is set to a numerical array. Defaults to `false` when `marker.cmin` and `marker.cmax` are set by the user.</param>
     /// <param name="CMax">Sets the upper bound of the color domain. Has an effect only if in `marker.color`is set to a numerical array. Value should have the same units as in `marker.color` and if set, `marker.cmin` must be set as well.</param>
@@ -217,7 +201,8 @@ type Chart =
     /// <param name="Colors">Sets the color of each sector. If not specified, the default trace color set is used to pick the sector colors.</param>
     /// <param name="ColorAxis">Sets a reference to a shared color axis. References to these shared color axes are "coloraxis", "coloraxis2", "coloraxis3", etc. Settings for these shared color axes are set in the layout, under `layout.coloraxis`, `layout.coloraxis2`, etc. Note that multiple color scales can be linked to the same color axis.</param>
     /// <param name="ColorBar">Sets the marker's color bar.</param>
-    /// <param name="Colorscale"></param>
+    /// <param name="Colorscale">Sets the colorscale. Has an effect only if colors is set to a numerical array. The colorscale must be an array containing arrays mapping a normalized value to an rgb, rgba, hex, hsl, hsv, or named color string. At minimum, a mapping for the lowest (0) and highest (1) values are required. For example, `[[0, 'rgb(0,0,255)'], [1, 'rgb(255,0,0)']]`. To control the bounds of the colorscale in color space, use `marker.cmin` and `marker.cmax`. Alternatively, `colorscale` may be a palette name string of the following list: Blackbody,Bluered,Blues,Cividis,Earth,Electric,Greens,Greys,Hot,Jet,Picnic,Portland,Rainbow,RdBu,Reds,Viridis,YlGnBu,YlOrRd.</param>
+    /// <param name="CornerRadius">Sets the maximum rounding of corners (in px).</param>
     /// <param name="Gradient">Sets the marker's gradient</param>
     /// <param name="Outline">Sets the marker's outline.</param>
     /// <param name="Opacity">Sets the marker opacity.</param>
@@ -231,6 +216,8 @@ type Chart =
     /// <param name="SizeMin">Has an effect only if `marker.size` is set to a numerical array. Sets the minimum size (in px) of the rendered marker points.</param>
     /// <param name="SizeMode">Has an effect only if `marker.size` is set to a numerical array. Sets the rule for which the data in `size` is converted to pixels.</param>
     /// <param name="SizeRef">Has an effect only if `marker.size` is set to a numerical array. Sets the scale factor used to determine the rendered size of marker points. Use with `sizemin` and `sizemode`.</param>
+    /// <param name="StandOff">Moves the marker away from the data point in the direction of `angle` (in px). This can be useful for example if you have another marker at this location and you want to point an arrowhead marker at it.</param>
+    /// <param name="MultiStandOff">Moves the marker away from the data point in the direction of `angle` (in px). This can be useful for example if you have another marker at this location and you want to point an arrowhead marker at it.</param>
     /// <param name="Symbol">Sets the marker symbol.</param>
     /// <param name="MultiSymbol">Sets the individual marker symbols.</param>
     /// <param name="Symbol3D">Sets the marker symbol for 3d traces.</param>
@@ -240,6 +227,8 @@ type Chart =
     [<CompiledName("WithMarkerStyle")>]
     static member withMarkerStyle
         (
+            [<Optional; DefaultParameterValue(null)>] ?Angle: float,
+            [<Optional; DefaultParameterValue(null)>] ?AngleRef: StyleParam.AngleRef,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?CAuto: bool,
             [<Optional; DefaultParameterValue(null)>] ?CMax: float,
@@ -250,6 +239,7 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?ColorAxis: StyleParam.SubPlotId,
             [<Optional; DefaultParameterValue(null)>] ?ColorBar: ColorBar,
             [<Optional; DefaultParameterValue(null)>] ?Colorscale: StyleParam.Colorscale,
+            [<Optional; DefaultParameterValue(null)>] ?CornerRadius: int,
             [<Optional; DefaultParameterValue(null)>] ?Gradient: Gradient,
             [<Optional; DefaultParameterValue(null)>] ?Outline: Line,
             [<Optional; DefaultParameterValue(null)>] ?MaxDisplayed: int,
@@ -263,6 +253,8 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?SizeMin: int,
             [<Optional; DefaultParameterValue(null)>] ?SizeMode: StyleParam.MarkerSizeMode,
             [<Optional; DefaultParameterValue(null)>] ?SizeRef: int,
+            [<Optional; DefaultParameterValue(null)>] ?StandOff: float,
+            [<Optional; DefaultParameterValue(null)>] ?MultiStandOff: seq<float>,
             [<Optional; DefaultParameterValue(null)>] ?Symbol: StyleParam.MarkerSymbol,
             [<Optional; DefaultParameterValue(null)>] ?MultiSymbol: seq<StyleParam.MarkerSymbol>,
             [<Optional; DefaultParameterValue(null)>] ?Symbol3D: StyleParam.MarkerSymbol3D,
@@ -272,8 +264,10 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (
+            |> GenericChart.mapTrace (
                 TraceStyle.Marker(
+                    ?Angle = Angle,
+                    ?AngleRef = AngleRef,
                     ?AutoColorScale = AutoColorScale,
                     ?CAuto = CAuto,
                     ?CMax = CMax,
@@ -284,6 +278,7 @@ type Chart =
                     ?ColorAxis = ColorAxis,
                     ?ColorBar = ColorBar,
                     ?Colorscale = Colorscale,
+                    ?CornerRadius = CornerRadius,
                     ?Gradient = Gradient,
                     ?Outline = Outline,
                     ?Size = Size,
@@ -302,7 +297,9 @@ type Chart =
                     ?ShowScale = ShowScale,
                     ?SizeMin = SizeMin,
                     ?SizeMode = SizeMode,
-                    ?SizeRef = SizeRef
+                    ?SizeRef = SizeRef,
+                    ?StandOff = StandOff,
+                    ?MultiStandOff = MultiStandOff
                 )
             )
 
@@ -310,7 +307,7 @@ type Chart =
     /// Sets the line for the chart's trace(s).
     /// </summary>
     /// <param name="line">The new Line for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already a Line (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already a Line (default is false)</param>
     [<CompiledName("SetLine")>]
     static member setLine(line: Line, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -334,6 +331,7 @@ type Chart =
     /// <summary>
     /// Applies the given styles to the line object(s) of the chart's trace(s). Overwrites attributes with the same name that are already set.
     /// </summary>
+    /// <param name="BackOff">Sets the line back off from the end point of the nth line segment (in px). This option is useful e.g. to avoid overlap with arrowhead markers. With "auto" the lines would trim before markers if `marker.angleref` is set to "previous".</param>
     /// <param name="AutoColorScale">Determines whether the colorscale is a default palette (`autocolorscale: true`) or the palette determined by `line.colorscale`. Has an effect only if in `line.color`is set to a numerical array. In case `colorscale` is unspecified or `autocolorscale` is true, the default palette will be chosen according to whether numbers in the `color` array are all positive, all negative or mixed.</param>
     /// <param name="CAuto">Determines whether or not the color domain is computed with respect to the input data (here in `line.color`) or the bounds set in `line.cmin` and `line.cmax` Has an effect only if in `line.color`is set to a numerical array. Defaults to `false` when `line.cmin` and `line.cmax` are set by the user.</param>
     /// <param name="CMax">Sets the upper bound of the color domain. Has an effect only if in `line.color`is set to a numerical array. Value should have the same units as in `line.color` and if set, `line.cmin` must be set as well.</param>
@@ -343,7 +341,7 @@ type Chart =
     /// <param name="ColorAxis">Sets a reference to a shared color axis. References to these shared color axes are "coloraxis", "coloraxis2", "coloraxis3", etc. Settings for these shared color axes are set in the layout, under `layout.coloraxis`, `layout.coloraxis2`, etc. Note that multiple color scales can be linked to the same color axis.</param>
     /// <param name="Colorscale">Sets the line colorscale</param>
     /// <param name="ReverseScale">Reverses the color mapping if true.</param>
-    /// <param name="ShowScale">Wether or not to show the color bar</param>
+    /// <param name="ShowScale">Whether or not to show the color bar</param>
     /// <param name="ColorBar">Sets the colorbar.</param>
     /// <param name="Dash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="Shape">Determines the line shape. With "spline" the lines are drawn using spline interpolation. The other available values correspond to step-wise line shapes.</param>
@@ -356,6 +354,7 @@ type Chart =
     [<CompiledName("WithLineStyle")>]
     static member withLineStyle
         (
+            [<Optional; DefaultParameterValue(null)>] ?BackOff: StyleParam.BackOff,
             [<Optional; DefaultParameterValue(null)>] ?AutoColorScale: bool,
             [<Optional; DefaultParameterValue(null)>] ?CAuto: bool,
             [<Optional; DefaultParameterValue(null)>] ?CMax: float,
@@ -378,8 +377,9 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (
+            |> GenericChart.mapTrace (
                 TraceStyle.Line(
+                    ?BackOff = BackOff,
                     ?AutoColorScale = AutoColorScale,
                     ?CAuto = CAuto,
                     ?CMax = CMax,
@@ -406,7 +406,7 @@ type Chart =
     /// Sets the error for the x dimension for the chart's trace(s).
     /// </summary>
     /// <param name="xError">The new Error in the x dimension for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Error object set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Error object set (default is false)</param>
     [<CompiledName("SetXError")>]
     static member setXError(xError: Error, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -462,7 +462,7 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (
+            |> GenericChart.mapTrace (
                 TraceStyle.XError(
                     ?Visible = Visible,
                     ?Type = Type,
@@ -484,7 +484,7 @@ type Chart =
     /// Sets the error for the y dimension for the chart's trace(s).
     /// </summary>
     /// <param name="yError">The new Error in the x dimension for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Error object set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Error object set (default is false)</param>
     [<CompiledName("SetYError")>]
     static member setYError(yError: Error, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -540,7 +540,7 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (
+            |> GenericChart.mapTrace (
                 TraceStyle.YError(
                     ?Visible = Visible,
                     ?Type = Type,
@@ -562,7 +562,7 @@ type Chart =
     /// Sets the error for the z dimension for the chart's trace(s).
     /// </summary>
     /// <param name="zError">The new Error in the x dimension for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Error object set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Error object set (default is false)</param>
     [<CompiledName("SetZError")>]
     static member setZError(zError: Error, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -618,7 +618,7 @@ type Chart =
         ) =
         fun (ch: GenericChart) ->
             ch
-            |> mapTrace (
+            |> GenericChart.mapTrace (
                 TraceStyle.ZError(
                     ?Visible = Visible,
                     ?Type = Type,
@@ -640,7 +640,7 @@ type Chart =
     /// Sets the ColorBar for the chart's trace(s).
     /// </summary>
     /// <param name="colorBar">The new ColorBar for the chart's trace(s)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already a ColorBar object set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already a ColorBar object set (default is false)</param>
     [<CompiledName("SetColorBar")>]
     static member setColorBar(colorBar: ColorBar, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -664,21 +664,51 @@ type Chart =
     /// <summary>
     /// Applies the given styles to the ColorBar object(s) of the chart's trace(s). Overwrites attributes with the same name that are already set.
     /// </summary>
-    /// <param name="TitleText">Sets the text of the colorbar title.</param>
-    /// <param name="TitleFont">Sets the font of the colorbar title.</param>
-    /// <param name="TitleStandoff">Sets the standoff distance (in px) between the colorbar labels and the title text.</param>
-    /// <param name="Title">Sets the Title (use this for more finegrained control than the other title-associated arguments)</param>
-    /// <param name="Len">Sets the length of the color bar This measure excludes the padding of both ends. That is, the color bar length is this length minus the padding on both ends.</param>
-    /// <param name="LenMode">Determines whether this color bar's length (i.e. the measure in the color variation direction) is set in units of plot "fraction" or in "pixels. Use `len` to set the value.</param>
     /// <param name="BGColor">Sets the color of padded area.</param>
     /// <param name="BorderColor">Sets the axis line color.</param>
+    /// <param name="BorderWidth">Sets the width (in px) or the border enclosing this color bar.</param>
+    /// <param name="DTick">Sets the step in-between ticks on this axis. Use with `tick0`. Must be a positive number, or special strings available to "log" and "date" axes. If the axis `type` is "log", then ticks are set every 10^(n"dtick) where n is the tick number. For example, to set a tick mark at 1, 10, 100, 1000, ... set dtick to 1. To set tick marks at 1, 100, 10000, ... set dtick to 2. To set tick marks at 1, 5, 25, 125, 625, 3125, ... set dtick to log_10(5), or 0.69897000433. "log" has several special values; "L&lt;f&gt;", where `f` is a positive number, gives ticks linearly spaced in value (but not position). For example `tick0` = 0.1, `dtick` = "L0.5" will put ticks at 0.1, 0.6, 1.1, 1.6 etc. To show powers of 10 plus small digits between, use "D1" (all digits) or "D2" (only 2 and 5). `tick0` is ignored for "D1" and "D2". If the axis `type` is "date", then you must convert the time to milliseconds. For example, to set the interval between ticks to one day, set `dtick` to 86400000.0. "date" also has special values "M&lt;n&gt;" gives ticks spaced by a number of months. `n` must be a positive integer. To set ticks on the 15th of every third month, set `tick0` to "2000-01-15" and `dtick` to "M3". To set ticks every 4 years, set `dtick` to "M48"</param>
+    /// <param name="ExponentFormat">Determines a formatting rule for the tick exponents. For example, consider the number 1,000,000,000. If "none", it appears as 1,000,000,000. If "e", 1e+9. If "E", 1E+9. If "power", 1x10^9 (with 9 in a super script). If "SI", 1G. If "B", 1B.</param>
+    /// <param name="LabelAlias">Replacement text for specific tick or hover labels. For example using {US: 'USA', CA: 'Canada'} changes US to USA and CA to Canada. The labels we would have shown must match the keys exactly, after adding any tickprefix or ticksuffix. labelalias can be used with any axis type, and both keys (if needed) and values (if desired) can include html-like tags or MathJax.</param>
+    /// <param name="Len">Sets the length of the color bar This measure excludes the padding of both ends. That is, the color bar length is this length minus the padding on both ends.</param>
+    /// <param name="LenMode">Determines whether this color bar's length (i.e. the measure in the color variation direction) is set in units of plot "fraction" or in "pixels. Use `len` to set the value.</param>
+    /// <param name="MinExponent">Hide SI prefix for 10^n if |n| is below this number. This only has an effect when `tickformat` is "SI" or "B".</param>
+    /// <param name="NTicks">Specifies the maximum number of ticks for the particular axis. The actual number of ticks will be chosen automatically to be less than or equal to `nticks`. Has an effect only if `tickmode` is set to "auto".</param>
+    /// <param name="Orientation">Sets the orientation of the colorbar.</param>
     /// <param name="OutlineColor">Sets the axis line color.</param>
+    /// <param name="OutlineWidth">Sets the width (in px) of the axis line.</param>
+    /// <param name="SeparateThousands">If "true", even 4-digit integers are separated</param>
+    /// <param name="ShowExponent">If "all", all exponents are shown besides their significands. If "first", only the exponent of the first tick is shown. If "last", only the exponent of the last tick is shown. If "none", no exponents appear.</param>
+    /// <param name="ShowTickLabels">Determines whether or not the tick labels are drawn.</param>
+    /// <param name="ShowTickPrefix">If "all", all tick labels are displayed with a prefix. If "first", only the first tick is displayed with a prefix. If "last", only the last tick is displayed with a suffix. If "none", tick prefixes are hidden.</param>
+    /// <param name="ShowTickSuffix">Same as `showtickprefix` but for tick suffixes.</param>
+    /// <param name="Thickness">Sets the thickness of the color bar This measure excludes the size of the padding, ticks and labels.</param>
+    /// <param name="ThicknessMode">Determines whether this color bar's thickness (i.e. the measure in the constant color direction) is set in units of plot "fraction" or in "pixels". Use `thickness` to set the value.</param>
+    /// <param name="Tick0">Sets the placement of the first tick on this axis. Use with `dtick`. If the axis `type` is "log", then you must take the log of your starting tick (e.g. to set the starting tick to 100, set the `tick0` to 2) except when `dtick`="L&gt;f&lt;" (see `dtick` for more info). If the axis `type` is "date", it should be a date string, like date data. If the axis `type` is "category", it should be a number, using the scale where each category is assigned a serial number from zero in the order it appears.</param>
+    /// <param name="TickAngle">Sets the angle of the tick labels with respect to the horizontal. For example, a `tickangle` of -90 draws the tick labels vertically.</param>
+    /// <param name="TickColor">Sets the tick color.</param>
+    /// <param name="TickFont">Sets the color bar's tick label font</param>
+    /// <param name="TickFormat">Sets the tick label formatting rule using d3 formatting mini-languages which are very similar to those in Python. For numbers, see: https://github.com/d3/d3-format/tree/v1.4.5#d3-format. And for dates see: https://github.com/d3/d3-time-format/tree/v2.2.3#locale_format. We add two items to d3's date formatter: "%h" for half of the year as a decimal number as well as "%{n}f" for fractional seconds with n digits. For example, "2016-10-13 09:15:23.456" with tickformat "%H~%M~%S.%2f" would display "09~15~23.46"</param>
+    /// <param name="TickFormatStops">Set rules for customizing TickFormat on different zoom levels</param>
+    /// <param name="TickLabelOverflow">Determines how we handle tick labels that would overflow either the graph div or the domain of the axis. The default value for inside tick labels is "hide past domain". In other cases the default is "hide past div".</param>
+    /// <param name="TickLabelPosition">Determines where tick labels are drawn.</param>
+    /// <param name="TickLabelStep">Sets the spacing between tick labels as compared to the spacing between ticks. A value of 1 (default) means each tick gets a label. A value of 2 means shows every 2nd label. A larger value n means only every nth tick is labeled. `tick0` determines which labels are shown. Not implemented for axes with `type` "log" or "multicategory", or when `tickmode` is "array".</param>    /// <param name="TickLen">Sets the tick length (in px).</param>
+    /// <param name="TickMode">Sets the tick mode for this axis. If "auto", the number of ticks is set via `nticks`. If "linear", the placement of the ticks is determined by a starting position `tick0` and a tick step `dtick` ("linear" is the default value if `tick0` and `dtick` are provided). If "array", the placement of the ticks is set via `tickvals` and the tick text is `ticktext`. ("array" is the default value if `tickvals` is provided).</param>
+    /// <param name="TickPrefix">Sets a tick label prefix.</param>
+    /// <param name="Ticks">Determines whether ticks are drawn or not. If "", this axis' ticks are not drawn. If "outside" ("inside"), this axis' are drawn outside (inside) the axis lines.</param>
+    /// <param name="TickSuffix">Sets a tick label suffix.</param>
+    /// <param name="TickText">Sets the text displayed at the ticks position via `tickvals`. Only has an effect if `tickmode` is set to "array". Used with `tickvals`.</param>
+    /// <param name="TickVals">Sets the values at which ticks on this axis appear. Only has an effect if `tickmode` is set to "array". Used with `ticktext`.</param>
+    /// <param name="TickWidth">Sets the tick width (in px).</param>
+    /// <param name="Title">Sets the ColorBar title.</param>
     /// <param name="X">Sets the x position of the color bar (in plot fraction).</param>
     /// <param name="XAnchor">Sets this color bar's horizontal position anchor. This anchor binds the `x` position to the "left", "center" or "right" of the color bar.</param>
     /// <param name="XPad">Sets the amount of padding (in px) along the x direction.</param>
+    /// <param name="XRef">Sets the container `x` refers to. "container" spans the entire `width` of the plot. "paper" refers to the width of the plotting area only.</param>
     /// <param name="Y">Sets the y position of the color bar (in plot fraction).</param>
     /// <param name="YAnchor">Sets this color bar's vertical position anchor This anchor binds the `y` position to the "top", "middle" or "bottom" of the color bar.</param>
     /// <param name="YPad">Sets the amount of padding (in px) along the y direction.</param>
+    /// <param name="YRef">Sets the container `y` refers to. "container" spans the entire `height` of the plot. "paper" refers to the height of the plotting area only.</param>
     [<CompiledName("WithColorbarStyle")>]
     static member withColorBarStyle
         (
@@ -686,17 +716,51 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?TitleFont: Font,
             [<Optional; DefaultParameterValue(null)>] ?TitleStandoff: int,
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
-            [<Optional; DefaultParameterValue(null)>] ?Len: float,
-            [<Optional; DefaultParameterValue(null)>] ?LenMode: StyleParam.UnitMode,
             [<Optional; DefaultParameterValue(null)>] ?BGColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?BorderColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?BorderWidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?DTick: IConvertible,
+            [<Optional; DefaultParameterValue(null)>] ?ExponentFormat: StyleParam.ExponentFormat,
+            [<Optional; DefaultParameterValue(null)>] ?LabelAlias: DynamicObj,
+            [<Optional; DefaultParameterValue(null)>] ?Len: float,
+            [<Optional; DefaultParameterValue(null)>] ?LenMode: StyleParam.UnitMode,
+            [<Optional; DefaultParameterValue(null)>] ?MinExponent: float,
+            [<Optional; DefaultParameterValue(null)>] ?NTicks: int,
+            [<Optional; DefaultParameterValue(null)>] ?Orientation: StyleParam.Orientation,
             [<Optional; DefaultParameterValue(null)>] ?OutlineColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?OutlineWidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?SeparateThousands: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowExponent: StyleParam.ShowExponent,
+            [<Optional; DefaultParameterValue(null)>] ?ShowTickLabels: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowTickPrefix: StyleParam.ShowTickOption,
+            [<Optional; DefaultParameterValue(null)>] ?ShowTickSuffix: StyleParam.ShowTickOption,
+            [<Optional; DefaultParameterValue(null)>] ?Thickness: float,
+            [<Optional; DefaultParameterValue(null)>] ?ThicknessMode: StyleParam.UnitMode,
+            [<Optional; DefaultParameterValue(null)>] ?Tick0: IConvertible,
+            [<Optional; DefaultParameterValue(null)>] ?TickAngle: int,
+            [<Optional; DefaultParameterValue(null)>] ?TickColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?TickFont: Font,
+            [<Optional; DefaultParameterValue(null)>] ?TickFormat: string,
+            [<Optional; DefaultParameterValue(null)>] ?TickFormatStops: seq<TickFormatStop>,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelOverflow: StyleParam.TickLabelOverflow,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelPosition: StyleParam.TickLabelPosition,
+            [<Optional; DefaultParameterValue(null)>] ?TickLabelStep: int,
+            [<Optional; DefaultParameterValue(null)>] ?TickLen: float,
+            [<Optional; DefaultParameterValue(null)>] ?TickMode: StyleParam.TickMode,
+            [<Optional; DefaultParameterValue(null)>] ?TickPrefix: string,
+            [<Optional; DefaultParameterValue(null)>] ?Ticks: StyleParam.TickOptions,
+            [<Optional; DefaultParameterValue(null)>] ?TickSuffix: string,
+            [<Optional; DefaultParameterValue(null)>] ?TickText: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?TickVals: seq<#IConvertible>,
+            [<Optional; DefaultParameterValue(null)>] ?TickWidth: float,
             [<Optional; DefaultParameterValue(null)>] ?X: float,
             [<Optional; DefaultParameterValue(null)>] ?XAnchor: StyleParam.HorizontalAlign,
             [<Optional; DefaultParameterValue(null)>] ?XPad: float,
+            [<Optional; DefaultParameterValue(null)>] ?XRef: string,
             [<Optional; DefaultParameterValue(null)>] ?Y: float,
             [<Optional; DefaultParameterValue(null)>] ?YAnchor: StyleParam.VerticalAlign,
-            [<Optional; DefaultParameterValue(null)>] ?YPad: float
+            [<Optional; DefaultParameterValue(null)>] ?YPad: float,
+            [<Optional; DefaultParameterValue(null)>] ?YRef: string
         ) =
 
         let title =
@@ -707,18 +771,51 @@ type Chart =
         let colorbar =
             ColorBar.init (
                 Title = title,
-                ?Len = Len,
-                ?LenMode = LenMode,
                 ?BGColor = BGColor,
                 ?BorderColor = BorderColor,
+                ?BorderWidth = BorderWidth,
+                ?DTick = DTick,
+                ?ExponentFormat = ExponentFormat,
+                ?LabelAlias = LabelAlias,
+                ?Len = Len,
+                ?LenMode = LenMode,
+                ?MinExponent = MinExponent,
+                ?NTicks = NTicks,
+                ?Orientation = Orientation,
                 ?OutlineColor = OutlineColor,
+                ?OutlineWidth = OutlineWidth,
+                ?SeparateThousands = SeparateThousands,
+                ?ShowExponent = ShowExponent,
+                ?ShowTickLabels = ShowTickLabels,
+                ?ShowTickPrefix = ShowTickPrefix,
+                ?ShowTickSuffix = ShowTickSuffix,
+                ?Thickness = Thickness,
+                ?ThicknessMode = ThicknessMode,
+                ?Tick0 = Tick0,
+                ?TickAngle = TickAngle,
+                ?TickColor = TickColor,
+                ?TickFont = TickFont,
+                ?TickFormat = TickFormat,
+                ?TickFormatStops = TickFormatStops,
+                ?TickLabelOverflow = TickLabelOverflow,
+                ?TickLabelPosition = TickLabelPosition,
+                ?TickLabelStep = TickLabelStep,
+                ?TickLen = TickLen,
+                ?TickMode = TickMode,
+                ?TickPrefix = TickPrefix,
+                ?Ticks = Ticks,
+                ?TickSuffix = TickSuffix,
+                ?TickText = TickText,
+                ?TickVals = TickVals,
+                ?TickWidth = TickWidth,
                 ?X = X,
                 ?XAnchor = XAnchor,
                 ?XPad = XPad,
+                ?XRef = XRef,
                 ?Y = Y,
                 ?YAnchor = YAnchor,
-                ?YPad = YPad
-
+                ?YPad = YPad,
+                ?YRef = YRef
             )
 
         Chart.withColorBar (colorbar)
@@ -750,7 +847,6 @@ type Chart =
     /// </summary>
     /// <param name="Title">Sets the title of the layout.</param>
     /// <param name="ShowLegend">Determines whether or not a legend is drawn. Default is `true` if there is a trace to show and any of these: a) Two or more traces would by default be shown in the legend. b) One pie trace is shown in the legend. c) One trace is explicitly given with `showlegend: true`.</param>
-    /// <param name="Legend">Sets the legend styles of the layout.</param>
     /// <param name="Margin">Sets the margins around the layout.</param>
     /// <param name="AutoSize">Determines whether or not a layout width or height that has been left undefined by the user is initialized on each relayout. Note that, regardless of this attribute, an undefined layout width or height is always initialized on the first call to plot.</param>
     /// <param name="Width">Sets the plot's width (in px).</param>
@@ -768,6 +864,8 @@ type Chart =
     /// <param name="ClickMode">Determines the mode of single click interactions. "event" is the default value and emits the `plotly_click` event. In addition this mode emits the `plotly_selected` event in drag modes "lasso" and "select", but with no event data attached (kept for compatibility reasons). The "select" flag enables selecting single data points via click. This mode also supports persistent selections, meaning that pressing Shift while clicking, adds to / subtracts from an existing selection. "select" with `hovermode`: "x" can be confusing, consider explicitly setting `hovermode`: "closest" when using this feature. Selection events are sent accordingly as long as "event" flag is set as well. When the "event" flag is missing, `plotly_click` and `plotly_selected` events are not fired.</param>
     /// <param name="DragMode">Determines the mode of drag interactions. "select" and "lasso" apply only to scatter traces with markers or text. "orbit" and "turntable" apply only to 3D scenes.</param>
     /// <param name="SelectDirection">When `dragmode` is set to "select", this limits the selection of the drag to horizontal, vertical or diagonal. "h" only allows horizontal selection, "v" only vertical, "d" only diagonal and "any" sets no limit.</param>
+    /// <param name="ActiveSelection">Sets the styling of the active selection</param>
+    /// <param name="NewSelection">Controls the behavior of newly drawn selections</param>
     /// <param name="HoverDistance">Sets the default distance (in pixels) to look for data to add hover labels (-1 means no cutoff, 0 means no looking for data). This is only a real distance for hovering on point-like objects, like scatter points. For area-like objects (bars, scatter fills, etc) hovering is on inside the area and off outside, but these objects will not supersede hover on point-like objects in case of conflict.</param>
     /// <param name="SpikeDistance">Sets the default distance (in pixels) to look for data to draw spikelines to (-1 means no cutoff, 0 means no looking for data). As with hoverdistance, distance does not apply to area-like objects. In addition, some objects can be hovered on but will not generate spikelines, such as scatter fills.</param>
     /// <param name="Hoverlabel">Sets the style ov hover labels.</param>
@@ -781,9 +879,13 @@ type Chart =
     /// <param name="Computed">Placeholder for exporting automargin-impacting values namely `margin.t`, `margin.b`, `margin.l` and `margin.r` in "full-json" mode.</param>
     /// <param name="Grid">Sets the layout grid for arranging multiple plots</param>
     /// <param name="Calendar">Sets the default calendar system to use for interpreting and displaying dates throughout the plot.</param>
+    /// <param name="MinReducedHeight">Minimum height of the plot with margin.automargin applied (in px)</param>
+    /// <param name="MinReducedWidth">Minimum width of the plot with margin.automargin applied (in px)</param>
     /// <param name="NewShape">Controls the behavior of newly drawn shapes</param>
     /// <param name="ActiveShape">Sets the styling of the active shape</param>
     /// <param name="HideSources">Determines whether or not a text link citing the data source is placed at the bottom-right cored of the figure. Has only an effect only on graphs that have been generated via forked graphs from the Chart Studio Cloud (at https://chart-studio.plotly.com or on-premise).</param>
+    /// <param name="ScatterGap">Sets the gap (in plot fraction) between scatter points of adjacent location coordinates. Defaults to `bargap`.</param>
+    /// <param name="ScatterMode">Determines how scatter points at the same location coordinate are displayed on the graph. With "group", the scatter points are plotted next to one another centered around the shared location. With "overlay", the scatter points are plotted over one another, you might need to reduce "opacity" to see multiple scatter points.</param>
     /// <param name="BarGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarGroupGap">Sets the gap (in plot fraction) between bars of adjacent location coordinates.</param>
     /// <param name="BarMode">Determines how bars at the same location coordinate are displayed on the graph. With "stack", the bars are stacked on top of one another With "relative", the bars are stacked on top of one another, with negative values below the axis, positive values above With "group", the bars are plotted next to one another centered around the shared location. With "overlay", the bars are plotted over one another, you might need to an "opacity" to see multiple bars.</param>
@@ -813,6 +915,7 @@ type Chart =
     /// <param name="IcicleColorWay">Sets the default icicle slice colors. Defaults to the main `colorway` used for trace colors. If you specify a new list here it can still be extended with lighter and darker colors, see `extendiciclecolors`.</param>
     /// <param name="Annotations">A collection containing all Annotations of this layout. An annotation is a text element that can be placed anywhere in the plot. It can be positioned with respect to relative coordinates in the plot or with respect to the actual data coordinates of the graph. Annotations can be shown with or without an arrow.</param>
     /// <param name="Shapes">A collection containing all Shapes of this layout.</param>
+    /// <param name="Selections">A collection containing all Selections of this layout.</param>
     /// <param name="Images">A collection containing all Images of this layout. </param>
     /// <param name="Sliders">A collection containing all Sliders of this layout. </param>
     /// <param name="UpdateMenus">A collection containing all UpdateMenus of this layout. </param>
@@ -821,7 +924,6 @@ type Chart =
         (
             [<Optional; DefaultParameterValue(null)>] ?Title: Title,
             [<Optional; DefaultParameterValue(null)>] ?ShowLegend: bool,
-            [<Optional; DefaultParameterValue(null)>] ?Legend: Legend,
             [<Optional; DefaultParameterValue(null)>] ?Margin: Margin,
             [<Optional; DefaultParameterValue(null)>] ?AutoSize: bool,
             [<Optional; DefaultParameterValue(null)>] ?Width: int,
@@ -839,6 +941,8 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?ClickMode: StyleParam.ClickMode,
             [<Optional; DefaultParameterValue(null)>] ?DragMode: StyleParam.DragMode,
             [<Optional; DefaultParameterValue(null)>] ?SelectDirection: StyleParam.SelectDirection,
+            [<Optional; DefaultParameterValue(null)>] ?ActiveSelection: ActiveSelection,
+            [<Optional; DefaultParameterValue(null)>] ?NewSelection: NewSelection,
             [<Optional; DefaultParameterValue(null)>] ?HoverDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?SpikeDistance: int,
             [<Optional; DefaultParameterValue(null)>] ?Hoverlabel: Hoverlabel,
@@ -852,9 +956,13 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?Computed: string,
             [<Optional; DefaultParameterValue(null)>] ?Grid: LayoutGrid,
             [<Optional; DefaultParameterValue(null)>] ?Calendar: StyleParam.Calendar,
-            [<Optional; DefaultParameterValue(null)>] ?NewShape: Shape,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedHeight: int,
+            [<Optional; DefaultParameterValue(null)>] ?MinReducedWidth: int,
+            [<Optional; DefaultParameterValue(null)>] ?NewShape: NewShape,
             [<Optional; DefaultParameterValue(null)>] ?ActiveShape: ActiveShape,
             [<Optional; DefaultParameterValue(null)>] ?HideSources: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterGap: float,
+            [<Optional; DefaultParameterValue(null)>] ?ScatterMode: StyleParam.ScatterMode,
             [<Optional; DefaultParameterValue(null)>] ?BarGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarGroupGap: float,
             [<Optional; DefaultParameterValue(null)>] ?BarMode: StyleParam.BarMode,
@@ -884,6 +992,7 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?IcicleColorWay: Color,
             [<Optional; DefaultParameterValue(null)>] ?Annotations: seq<Annotation>,
             [<Optional; DefaultParameterValue(null)>] ?Shapes: seq<Shape>,
+            [<Optional; DefaultParameterValue(null)>] ?Selections: seq<Selection>,
             [<Optional; DefaultParameterValue(null)>] ?Images: seq<LayoutImage>,
             [<Optional; DefaultParameterValue(null)>] ?Sliders: seq<Slider>,
             [<Optional; DefaultParameterValue(null)>] ?UpdateMenus: seq<UpdateMenu>
@@ -894,7 +1003,6 @@ type Chart =
                 Layout.init (
                     ?Title = Title,
                     ?ShowLegend = ShowLegend,
-                    ?Legend = Legend,
                     ?Margin = Margin,
                     ?AutoSize = AutoSize,
                     ?Width = Width,
@@ -912,6 +1020,8 @@ type Chart =
                     ?ClickMode = ClickMode,
                     ?DragMode = DragMode,
                     ?SelectDirection = SelectDirection,
+                    ?NewSelection = NewSelection,
+                    ?ActiveSelection = ActiveSelection,
                     ?HoverDistance = HoverDistance,
                     ?SpikeDistance = SpikeDistance,
                     ?Hoverlabel = Hoverlabel,
@@ -926,8 +1036,12 @@ type Chart =
                     ?Grid = Grid,
                     ?Calendar = Calendar,
                     ?NewShape = NewShape,
+                    ?MinReducedHeight = MinReducedHeight,
+                    ?MinReducedWidth = MinReducedWidth,
                     ?ActiveShape = ActiveShape,
                     ?HideSources = HideSources,
+                    ?ScatterGap = ScatterGap,
+                    ?ScatterMode = ScatterMode,
                     ?BarGap = BarGap,
                     ?BarGroupGap = BarGroupGap,
                     ?BarMode = BarMode,
@@ -957,6 +1071,7 @@ type Chart =
                     ?IcicleColorWay = IcicleColorWay,
                     ?Annotations = Annotations,
                     ?Shapes = Shapes,
+                    ?Selections = Selections,
                     ?Images = Images,
                     ?Sliders = Sliders,
                     ?UpdateMenus = UpdateMenus
@@ -969,8 +1084,8 @@ type Chart =
     /// </summary>
     /// <param name="axis">The x axis to set on the chart's layout</param>
     /// <param name="id">The target axis id with which the axis should be set.</param>
-    /// <param name="SceneAxis">If set on a scene, define wether it is the x, y or z axis. default is x.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="SceneAxis">If set on a scene, define whether it is the x, y or z axis. default is x.</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetAxis")>]
     static member setAxis
         (
@@ -1013,7 +1128,7 @@ type Chart =
                             match sceneAxisId with
                             | StyleParam.SubPlotId.XAxis _ -> scene |> Scene.getXAxis
                             | StyleParam.SubPlotId.YAxis _ -> scene |> Scene.getYAxis
-                            | StyleParam.SubPlotId.ZAxis _ -> scene |> Scene.getZAxis
+                            | StyleParam.SubPlotId.ZAxis   -> scene |> Scene.getZAxis
                             | _ -> failwith "invalid scene axis id"
 
                         let updatedAxis =
@@ -1025,7 +1140,7 @@ type Chart =
                                 match sceneAxisId with
                                 | StyleParam.SubPlotId.XAxis _ -> s |> Scene.setXAxis axis
                                 | StyleParam.SubPlotId.YAxis _ -> s |> Scene.setYAxis axis
-                                | StyleParam.SubPlotId.ZAxis _ -> s |> Scene.setZAxis axis
+                                | StyleParam.SubPlotId.ZAxis   -> s |> Scene.setZAxis axis
                                 | _ -> failwith "invalid scene axis id"
 
                         layout |> Layout.updateSceneById (id, updatedScene)
@@ -1038,7 +1153,7 @@ type Chart =
                                 match sceneAxisId with
                                 | StyleParam.SubPlotId.XAxis _ -> s |> Scene.setXAxis axis
                                 | StyleParam.SubPlotId.YAxis _ -> s |> Scene.setYAxis axis
-                                | StyleParam.SubPlotId.ZAxis _ -> s |> Scene.setZAxis axis
+                                | StyleParam.SubPlotId.ZAxis   -> s |> Scene.setZAxis axis
                                 | _ -> failwith "invalid scene axis id"
 
                         layout |> Layout.updateSceneById (id, updatedScene))
@@ -1080,6 +1195,7 @@ type Chart =
     /// <param name="LineColor">Sets the axis line color.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="ZeroLine">Determines whether or not a line is drawn at along the 0 value of this axis. If "true", the zero line is drawn on top of the grid lines.</param>
     /// <param name="ZeroLineColor">Sets the line color of the zero line.</param>
     /// <param name="Anchor">If set to an opposite-letter axis id (e.g. `x2`, `y`), this axis is bound to the corresponding opposite-letter axis. If set to "free", this axis' position is determined by `position`.</param>
@@ -1112,6 +1228,7 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?LineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?ZeroLine: bool,
             [<Optional; DefaultParameterValue(null)>] ?ZeroLineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?Anchor: StyleParam.LinearAxisId,
@@ -1153,6 +1270,7 @@ type Chart =
                 ?LineColor = LineColor,
                 ?ShowGrid = ShowGrid,
                 ?GridColor = GridColor,
+                ?GridDash = GridDash,
                 ?ZeroLine = ZeroLine,
                 ?ZeroLineColor = ZeroLineColor,
                 ?Anchor = Anchor,
@@ -1169,11 +1287,6 @@ type Chart =
             )
 
         Chart.withXAxis (xaxis, ?Id = Id)
-
-    [<Obsolete("Use withXAxisRangeSlider instead")>]
-    [<CompiledName("WithX_AxisRangeSlider")>]
-    static member withX_AxisRangeSlider(rangeSlider: RangeSlider, [<Optional; DefaultParameterValue(null)>] ?Id) =
-        Chart.withXAxisRangeSlider (rangeSlider, ?Id = Id)
 
     /// Sets the range slider for the xAxis
     [<CompiledName("WithXAxisRangeSlider")>]
@@ -1218,11 +1331,14 @@ type Chart =
     /// <param name="LineColor">Sets the axis line color.</param>
     /// <param name="ShowGrid">Determines whether or not grid lines are drawn. If "true", the grid lines are drawn at every tick mark.</param>
     /// <param name="GridColor">Sets the color of the grid lines.</param>
+    /// <param name="GridDash">Sets the dash style of lines. Set to a dash type string ("solid", "dot", "dash", "longdash", "dashdot", or "longdashdot") or a dash length list in px (eg "5px,10px,2px,2px").</param>
     /// <param name="ZeroLine">Determines whether or not a line is drawn at along the 0 value of this axis. If "true", the zero line is drawn on top of the grid lines.</param>
     /// <param name="ZeroLineColor">Sets the line color of the zero line.</param>
     /// <param name="Anchor">If set to an opposite-letter axis id (e.g. `x2`, `y`), this axis is bound to the corresponding opposite-letter axis. If set to "free", this axis' position is determined by `position`.</param>
     /// <param name="Side">Determines whether a x (y) axis is positioned at the "bottom" ("left") or "top" ("right") of the plotting area.</param>
     /// <param name="Overlaying">If set a same-letter axis id, this axis is overlaid on top of the corresponding same-letter axis, with traces and axes visible for both axes. If "false", this axis does not overlay any same-letter axes. In this case, for axes with overlapping domains only the highest-numbered axis will be visible.</param>
+    /// <param name="AutoShift">Automatically reposition the axis to avoid overlap with other axes with the same `overlaying` value. This repositioning will account for any `shift` amount applied to other axes on the same side with `autoshift` is set to true. Only has an effect if `anchor` is set to "free".</param>
+    /// <param name="Shift">Moves the axis a given number of pixels from where it would have been otherwise. Accepts both positive and negative values, which will shift the axis either right or left, respectively. If `autoshift` is set to true, then this defaults to a padding of -3 if `side` is set to "left". and defaults to +3 if `side` is set to "right". Defaults to 0 if `autoshift` is set to false. Only has an effect if `anchor` is set to "free".</param>
     /// <param name="Domain">Tuple of (X*Y fractions). Sets the domain of this axis (in plot fraction).</param>
     /// <param name="Position">Sets the position of this axis in the plotting space (in normalized coordinates). Only has an effect if `anchor` is set to "free".</param>
     /// <param name="CategoryOrder">Specifies the ordering logic for the case of categorical variables. By default, plotly uses "trace", which specifies the order that is present in the data supplied. Set `categoryorder` to "category ascending" or "category descending" if order should be determined by the alphanumerical order of the category names. Set `categoryorder` to "array" to derive the ordering from the attribute `categoryarray`. If a category is not found in the `categoryarray` array, the sorting behavior for that attribute will be identical to the "trace" mode. The unspecified categories will follow the categories in `categoryarray`. Set `categoryorder` to "total ascending" or "total descending" if order should be determined by the numerical order of the values. Similarly, the order can be determined by the min, max, sum, mean or median of all the values.</param>
@@ -1250,11 +1366,14 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?LineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?ShowGrid: bool,
             [<Optional; DefaultParameterValue(null)>] ?GridColor: Color,
+            [<Optional; DefaultParameterValue(null)>] ?GridDash: StyleParam.DrawingStyle,
             [<Optional; DefaultParameterValue(null)>] ?ZeroLine: bool,
             [<Optional; DefaultParameterValue(null)>] ?ZeroLineColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?Anchor: StyleParam.LinearAxisId,
             [<Optional; DefaultParameterValue(null)>] ?Side: StyleParam.Side,
             [<Optional; DefaultParameterValue(null)>] ?Overlaying: StyleParam.LinearAxisId,
+            [<Optional; DefaultParameterValue(null)>] ?AutoShift: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Shift: int,
             [<Optional; DefaultParameterValue(null)>] ?Domain: float * float,
             [<Optional; DefaultParameterValue(null)>] ?Position: float,
             [<Optional; DefaultParameterValue(null)>] ?CategoryOrder: StyleParam.CategoryOrder,
@@ -1291,11 +1410,14 @@ type Chart =
                 ?LineColor = LineColor,
                 ?ShowGrid = ShowGrid,
                 ?GridColor = GridColor,
+                ?GridDash = GridDash,
                 ?ZeroLine = ZeroLine,
                 ?ZeroLineColor = ZeroLineColor,
                 ?Anchor = Anchor,
                 ?Side = Side,
                 ?Overlaying = Overlaying,
+                ?AutoShift = AutoShift,
+                ?Shift = Shift,
                 ?Position = Position,
                 ?CategoryOrder = CategoryOrder,
                 ?CategoryArray = CategoryArray,
@@ -1438,7 +1560,7 @@ type Chart =
     /// </summary>
     /// <param name="scene">The Scene object to set on the chart's layout</param>
     /// <param name="id">The target scene id with which the Scene object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Scene set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Scene set (default is false)</param>
     [<CompiledName("SetScene")>]
     static member setScene
         (
@@ -1528,7 +1650,7 @@ type Chart =
     /// </summary>
     /// <param name="polar">The Polar object to set on the chart's layout</param>
     /// <param name="id">The target polar id with which the Polar object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Polar set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Polar set (default is false)</param>
     [<CompiledName("SetPolar")>]
     static member setPolar
         (
@@ -1606,7 +1728,7 @@ type Chart =
     /// </summary>
     /// <param name="angularAxis">The AngularAxis to set on the target polar object on the chart's layout</param>
     /// <param name="id">The target polar id with which the AngularAxis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetAngularAxis")>]
     static member setAngularAxis
         (
@@ -1665,7 +1787,7 @@ type Chart =
     /// </summary>
     /// <param name="radialAxis">The RadialAxis to set on the target polar object on the chart's layout</param>
     /// <param name="id">The target polar id with which the RadialAxis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetRadialAxis")>]
     static member setRadialAxis
         (
@@ -1724,7 +1846,7 @@ type Chart =
     /// </summary>
     /// <param name="smith">The Smith object to set on the chart's layout</param>
     /// <param name="id">The target smith id with which the Smith object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Smith set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Smith set (default is false)</param>
     [<CompiledName("SetSmith")>]
     static member setSmith
         (
@@ -1781,7 +1903,7 @@ type Chart =
     /// </summary>
     /// <param name="imaginaryAxis">The ImaginaryAxis to set on the target polar object on the chart's layout</param>
     /// <param name="id">The target polar id with which the ImaginaryAxis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetImaginaryAxis")>]
     static member setImaginaryAxis
         (
@@ -1840,7 +1962,7 @@ type Chart =
     /// </summary>
     /// <param name="realAxis">The RealAxis to set on the target smith object on the chart's layout</param>
     /// <param name="id">The target smith id with which the RealAxis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetRealAxis")>]
     static member setRealAxis
         (
@@ -1898,7 +2020,7 @@ type Chart =
     /// </summary>
     /// <param name="geo">The Geo object to set on the chart's layout</param>
     /// <param name="id">The target Geo id with which the Geo object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Geo set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Geo set (default is false)</param>
     [<CompiledName("SetGeo")>]
     static member setGeo(geo: Geo, id: StyleParam.SubPlotId, [<Optional; DefaultParameterValue(null)>] ?Combine: bool) =
 
@@ -1934,7 +2056,7 @@ type Chart =
     /// <param name="Scope">Set the scope of the map.</param>
     /// <param name="Projection">Determines the type of projection used to display the map</param>
     /// <param name="Center">Sets the (lon,lat) coordinates of the map's center. By default, the map's longitude center lies at the middle of the longitude range for scoped projection and above `projection.rotation.lon` otherwise. For all projection types, the map's latitude center lies at the middle of the latitude range by default.</param>
-    /// <param name="Visible">Wether or not the base layers are visible</param>
+    /// <param name="Visible">Whether or not the base layers are visible</param>
     /// <param name="Domain">The domain of this geo subplot</param>
     /// <param name="ShowCoastLines">Sets whether or not the coastlines are drawn.</param>
     /// <param name="CoastLineColor">Sets the coastline color.</param>
@@ -2073,7 +2195,7 @@ type Chart =
     /// </summary>
     /// <param name="mapbox">The Mapbox object to set on the chart's layout</param>
     /// <param name="id">The target Mapbox id with which the Mapbox object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Mapbox set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Mapbox set (default is false)</param>
     [<CompiledName("SetMapbox")>]
     static member setMapbox
         (
@@ -2150,7 +2272,7 @@ type Chart =
     /// </summary>
     /// <param name="ternary">The Ternary object to set on the chart's layout</param>
     /// <param name="id">The target Ternary id with which the Ternary object should be set.</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an Ternary set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Ternary set (default is false)</param>
     [<CompiledName("SetTernary")>]
     static member setTernary
         (
@@ -2221,7 +2343,7 @@ type Chart =
     /// </summary>
     /// <param name="aAxis">The a Axis to set on the target ternary object on the chart's layout</param>
     /// <param name="id">The target ternary id with which the a Axis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetAAxis")>]
     static member setAAxis
         (
@@ -2281,7 +2403,7 @@ type Chart =
     /// </summary>
     /// <param name="bAxis">The b Axis to set on the target ternary object on the chart's layout</param>
     /// <param name="id">The target ternary id with which the b Axis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetBAxis")>]
     static member setBAxis
         (
@@ -2341,7 +2463,7 @@ type Chart =
     /// </summary>
     /// <param name="cAxis">The c Axis to set on the target ternary object on the chart's layout</param>
     /// <param name="id">The target ternary id with which the c Axis should be set.(default is 1)</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already an axis set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an axis set (default is false)</param>
     [<CompiledName("SetCAxis")>]
     static member setCAxis
         (
@@ -2400,7 +2522,7 @@ type Chart =
     /// Sets the LayoutGrid for the chart's layout.
     /// </summary>
     /// <param name="layoutGrid">The new LayoutGrid for the chart's layout</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already a ColorBar object set (default is false)</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already a ColorBar object set (default is false)</param>
     [<CompiledName("SetLayoutGrid")>]
     static member setLayoutGrid(layoutGrid: LayoutGrid, ?Combine: bool) =
         let combine = defaultArg Combine false
@@ -2441,9 +2563,9 @@ type Chart =
     [<CompiledName("WithLayoutGridStyle")>]
     static member withLayoutGridStyle
         (
-            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId) [] [],
-            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId [],
-            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId [],
+            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId)[][],
+            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId[],
+            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId[],
             [<Optional; DefaultParameterValue(null)>] ?Rows: int,
             [<Optional; DefaultParameterValue(null)>] ?Columns: int,
             [<Optional; DefaultParameterValue(null)>] ?RowOrder: StyleParam.LayoutGridRowOrder,
@@ -2475,38 +2597,52 @@ type Chart =
             ch |> Chart.withLayoutGrid grid)
 
     /// <summary>
-    /// Sets the Legend for the chart's layout.
+    /// Sets the given Legend with the given id on the input chart's layout.
     /// </summary>
-    /// <param name="legend">The new Legend for the chart's layout</param>
-    /// <param name="Combine">Wether or not to combine the objects if there is already a Legend object set (default is false)</param>
+    /// <param name="legend">The Legend to set on the chart's layout</param>
+    /// <param name="id">The target Legend id with which the Legend should be set.</param>
+    /// <param name="Combine">Whether or not to combine the objects if there is already an Legend set (default is false)</param>
     [<CompiledName("SetLegend")>]
-    static member setLegend(legend: Legend, ?Combine: bool) =
-        let combine = defaultArg Combine false
+    static member setLegend
+        (
+            legend: Legend,
+            id: StyleParam.SubPlotId,
+            [<Optional; DefaultParameterValue(null)>] ?Combine: bool
+        ) =
+            let combine = defaultArg Combine false
 
-        (fun (ch: GenericChart) ->
-            if combine then
-                ch |> GenericChart.mapLayout (Layout.updateLegend legend)
-            else
-                ch |> GenericChart.mapLayout (Layout.setLegend legend))
+            (fun (ch: GenericChart) ->
+                if combine then
+                    ch |> GenericChart.mapLayout (Layout.updateLegendById(id, legend))
+                else
+                    ch |> GenericChart.mapLayout (Layout.setLegend(id,legend))
+            )
 
     /// <summary>
-    /// Sets the Legend for the chart's layout
+    /// Sets the given Legend on the input chart's layout, optionally passing a target Legend id.
     ///
-    /// If there is already a Legend set, the objects are combined.
+    /// If there is already an Legend set at the given id, the Legend objects are combined.
     /// </summary>
-    /// <param name="legend">The new Legend for the chart's layout</param>
+    /// <param name="legend">The Legend to set on the chart's layout</param>
+    /// <param name="Id">The target Legend id with which the Legend should be set. Default is 1.</param>
     [<CompiledName("WithLegend")>]
-    static member withLegend(legend: Legend) =
-        (fun (ch: GenericChart) -> ch |> Chart.setLegend (legend, true))
+    static member withLegend(legend: Legend, [<Optional; DefaultParameterValue(null)>] ?Id: int) =
+        let id =
+            Id |> Option.defaultValue 1 |> StyleParam.SubPlotId.Legend
+
+        fun (ch: GenericChart) ->
+            ch |> Chart.setLegend (legend, id, Combine = true)
 
     /// <summary>
-    /// Sets the given Legend styles on the input chart's Legend.
+    /// Sets the given Legend styles on the input chart's Legend, optionally passing a target Legend id.
     ///
     /// If there is already a Legend set , the styles are applied to it. If there is no Legend present, a new Legend object with the given styles will be set.
     /// </summary>
     /// <param name="BGColor">Sets the legend background color. Defaults to `layout.paper_bgcolor`.</param>
     /// <param name="BorderColor">Sets the color of the border enclosing the legend.</param>
-    /// <param name="Borderwidth">Sets the width (in px) of the border enclosing the legend.</param>
+    /// <param name="BorderWidth">Sets the width (in px) of the border enclosing the legend.</param>
+    /// <param name="EntryWidth">Sets the width (in px or fraction) of the legend. Use 0 to size the entry based on the text width, when `entrywidthmode` is set to "pixels".</param>
+    /// <param name="EntryWidthMode">Determines what entrywidth means.</param>
     /// <param name="Font">Sets the font used to text the legend items.</param>
     /// <param name="GroupClick">Determines the behavior on legend group item click. "toggleitem" toggles the visibility of the individual item clicked on the graph. "togglegroup" toggles the visibility of all items in the same legendgroup as the item clicked on the graph.</param>
     /// <param name="GroupTitleFont">Sets the font for group titles in legend. Defaults to `legend.font` with its size increased about 10%.</param>
@@ -2520,16 +2656,21 @@ type Chart =
     /// <param name="TraceOrder">Determines the order at which the legend items are displayed. If "normal", the items are displayed top-to-bottom in the same order as the input data. If "reversed", the items are displayed in the opposite order as "normal". If "grouped", the items are displayed in groups (when a trace `legendgroup` is provided). if "grouped+reversed", the items are displayed in the opposite order as "grouped".</param>
     /// <param name="UIRevision">Controls persistence of legend-driven changes in trace and pie label visibility. Defaults to `layout.uirevision`.</param>
     /// <param name="VerticalAlign">Sets the vertical alignment of the symbols with respect to their associated text.</param>
+    /// <param name="Visible">Determines whether or not this legend is visible.</param>
     /// <param name="X">Sets the x position (in normalized coordinates) of the legend. Defaults to "1.02" for vertical legends and defaults to "0" for horizontal legends.</param>
     /// <param name="XAnchor">Sets the legend's horizontal position anchor. This anchor binds the `x` position to the "left", "center" or "right" of the legend. Value "auto" anchors legends to the right for `x` values greater than or equal to 2/3, anchors legends to the left for `x` values less than or equal to 1/3 and anchors legends with respect to their center otherwise.</param>
+    /// <param name="XRef">Sets the container `x` refers to. "container" spans the entire `width` of the plot. "paper" refers to the width of the plotting area only.</param>
     /// <param name="Y">Sets the y position (in normalized coordinates) of the legend. Defaults to "1" for vertical legends, defaults to "-0.1" for horizontal legends on graphs w/o range sliders and defaults to "1.1" for horizontal legends on graph with one or multiple range sliders.</param>
     /// <param name="YAnchor">Sets the legend's vertical position anchor This anchor binds the `y` position to the "top", "middle" or "bottom" of the legend. Value "auto" anchors legends at their bottom for `y` values less than or equal to 1/3, anchors legends to at their top for `y` values greater than or equal to 2/3 and anchors legends with respect to their middle otherwise.</param>
+    /// <param name="YRef">Sets the container `y` refers to. "container" spans the entire `height` of the plot. "paper" refers to the height of the plotting area only.</param>
     [<CompiledName("WithLegendStyle")>]
     static member withLegendStyle
         (
             [<Optional; DefaultParameterValue(null)>] ?BGColor: Color,
             [<Optional; DefaultParameterValue(null)>] ?BorderColor: Color,
-            [<Optional; DefaultParameterValue(null)>] ?Borderwidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?BorderWidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?EntryWidth: float,
+            [<Optional; DefaultParameterValue(null)>] ?EntryWidthMode: StyleParam.EntryWidthMode,
             [<Optional; DefaultParameterValue(null)>] ?Font: Font,
             [<Optional; DefaultParameterValue(null)>] ?GroupClick: StyleParam.TraceGroupClickOptions,
             [<Optional; DefaultParameterValue(null)>] ?GroupTitleFont: Font,
@@ -2543,17 +2684,23 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?TraceOrder: StyleParam.TraceOrder,
             [<Optional; DefaultParameterValue(null)>] ?UIRevision: string,
             [<Optional; DefaultParameterValue(null)>] ?VerticalAlign: StyleParam.VerticalAlign,
+            [<Optional; DefaultParameterValue(null)>] ?Visible: bool,
             [<Optional; DefaultParameterValue(null)>] ?X: float,
             [<Optional; DefaultParameterValue(null)>] ?XAnchor: StyleParam.XAnchorPosition,
+            [<Optional; DefaultParameterValue(null)>] ?XRef: string,
             [<Optional; DefaultParameterValue(null)>] ?Y: float,
-            [<Optional; DefaultParameterValue(null)>] ?YAnchor: StyleParam.YAnchorPosition
+            [<Optional; DefaultParameterValue(null)>] ?YAnchor: StyleParam.YAnchorPosition,
+            [<Optional; DefaultParameterValue(null)>] ?YRef: string,
+            [<Optional; DefaultParameterValue(null)>] ?Id: int
         ) =
         (fun (ch: GenericChart) ->
             let legend =
                 Legend.init (
                     ?BGColor = BGColor,
                     ?BorderColor = BorderColor,
-                    ?Borderwidth = Borderwidth,
+                    ?BorderWidth = BorderWidth,
+                    ?EntryWidth = EntryWidth,
+                    ?EntryWidthMode = EntryWidthMode,
                     ?Font = Font,
                     ?GroupClick = GroupClick,
                     ?GroupTitleFont = GroupTitleFont,
@@ -2567,14 +2714,16 @@ type Chart =
                     ?TraceOrder = TraceOrder,
                     ?UIRevision = UIRevision,
                     ?VerticalAlign = VerticalAlign,
+                    ?Visible = Visible,
                     ?X = X,
                     ?XAnchor = XAnchor,
+                    ?XRef = XRef,
                     ?Y = Y,
-                    ?YAnchor = YAnchor
-
+                    ?YAnchor = YAnchor,
+                    ?YRef = YRef
                 )
 
-            ch |> Chart.withLegend legend)
+            ch |> Chart.withLegend(legend, ?Id = Id))
 
     /// <summary>
     ///
@@ -2627,16 +2776,6 @@ type Chart =
                 Layout() |> Layout.style (Title = title)
 
             GenericChart.addLayout layout ch)
-
-    // Set showLegend of a Chart
-    [<CompiledName("WithLegend")>]
-    static member withLegend(showlegend) =
-        (fun (ch: GenericChart) ->
-            let layout =
-                Layout() |> Layout.style (ShowLegend = showlegend)
-
-            GenericChart.addLayout layout ch)
-
 
     /// Sets the size of a Chart (in pixels)
     [<CompiledName("WithSize")>]
@@ -2698,8 +2837,8 @@ type Chart =
     // TODO: Include withLegend & withLegendStyle
 
     //Specifies the shape type to be drawn. If "line", a line is drawn from (`x0`,`y0`) to (`x1`,`y1`) If "circle", a circle is drawn from
-//((`x0`+`x1`)/2, (`y0`+`y1`)/2)) with radius (|(`x0`+`x1`)/2 - `x0`|, |(`y0`+`y1`)/2 -`y0`)|) If "rect", a rectangle is drawn linking
-//(`x0`,`y0`), (`x1`,`y0`), (`x1`,`y1`), (`x0`,`y1`), (`x0`,`y0`)
+    //((`x0`+`x1`)/2, (`y0`+`y1`)/2)) with radius (|(`x0`+`x1`)/2 - `x0`|, |(`y0`+`y1`)/2 -`y0`)|) If "rect", a rectangle is drawn linking
+    //(`x0`,`y0`), (`x1`,`y0`), (`x1`,`y1`), (`x0`,`y1`), (`x0`,`y0`)
 
     /// <summary>
     ///
@@ -2729,6 +2868,35 @@ type Chart =
     static member withShape(shape: Shape, [<Optional; DefaultParameterValue(true)>] ?Append: bool) =
         Chart.withShapes ([ shape ], ?Append = Append)
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="selections">The selections to add to the input charts layout</param>
+    /// <param name="Append">If true, the input selections will be appended to existing annotations, otherwise existing annotations will be removed (default: true)</param>
+    [<CompiledName("WithSelections")>]
+    static member withSelections(selections: seq<Selection>, [<Optional; DefaultParameterValue(true)>] ?Append: bool) =
+        let append = defaultArg Append true
+
+        fun (ch: GenericChart) ->
+
+            let selections' =
+
+                if append then
+
+                    let layout = GenericChart.getLayout ch
+
+                    layout.TryGetTypedValue<seq<Selection>>("selections")
+                    |> Option.defaultValue Seq.empty
+                    |> Seq.append selections
+
+                else
+                    selections
+
+            ch |> GenericChart.mapLayout (Layout.style (Selections = selections'))
+
+    [<CompiledName("WithSelection")>]
+    static member withSelection(selection: Selection, [<Optional; DefaultParameterValue(true)>] ?Append: bool) =
+        Chart.withSelections ([ selection ], ?Append = Append)
 
     //==============================================================================================================
     //======================================= General Config object styling ========================================
@@ -2755,49 +2923,154 @@ type Chart =
     /// <summary>
     /// Applies the given styles to the chart's Config object. Overwrites attributes with the same name that are already set.
     /// </summary>
-    /// <param name="StaticPlot">Determines whether the plot is interactive or not. (default: false)</param>
-    /// <param name="PlotlyServerUrl">When set it determines base URL for the 'Edit in Chart Studio'/`showEditInChartStudio`/`showSendToCloud` mode bar button', and the showLink/sendData on-graph link. To enable sending your data to Chart Studio Cloud, you need to' set both `plotlyServerURL` to \'https://chart-studio.plotly.com\' and also set `showSendToCloud` to true.</param>
+    /// <param name="StaticPlot">Determines whether the graphs are interactive or not. If *false*, no interactivity, for export or image generation.</param>
+    /// <param name="TypesetMath">Determines whether math should be typeset or not, when MathJax (either v2 or v3) is present on the page.</param>
+    /// <param name="PlotlyServerUrl">When set it determines base URL form the \'Edit in Chart Studio\' `showEditInChartStudio`/`showSendToCloud` mode bar button and the showLink/sendData on-graph link. To enable sending your data to Chart Studio Cloud, you need to set both `plotlyServerURL` to \'https://chart-studio.plotly.com\' and also set `showSendToCloud` to true.</param>
     /// <param name="Editable">Determines whether the graph is editable or not. Sets all pieces of `edits` unless a separate `edits` config item overrides individual parts.</param>
-    /// <param name="Edits">Object holding individual editable pieces of the graph.</param>
-    /// <param name="Autosizable">Determines whether the graphs are plotted with respect to layout.autosize:true and infer its container size. (default: false)</param>
-    /// <param name="Responsive">Determines whether to change the layout size when window is resized.</param>
-    /// <param name="ShowSendToCloud">Should we include a ModeBar button, labeled "Edit in Chart Studio",that sends this chart to chart-studio.plotly.com (formerly plot.ly) or another plotly server as specified by `plotlyServerURL` for editing, export, etc? Note that this button can (depending on `plotlyServerURL` being set) send your data to an external server. However that server does not persist your data until you arrive at the Chart Studio and explicitly click "Save".</param>
-    /// <param name="ShowEditInChartStudio">Same as `showSendToCloud`, but use a pencil icon instead of a floppy-disk. Note that if both `showSendToCloud` and `showEditInChartStudio` are turned,  only `showEditInChartStudio` will be honored.</param>
-    /// <param name="ToImageButtonOptions">Statically override options for toImage modebar button</param>
-    /// <param name="ModeBarButtonsToAdd">ModeBar buttons to add to the graph.</param>
+    /// <param name="Edits">Determines if the main anchor of the annotation is editable. The main anchor corresponds to the text (if no arrow) or the arrow (which drags the whole thing leaving the arrow length and direction unchanged).</param>
+    /// <param name="EditSelection">Enables moving selections.</param>
+    /// <param name="Autosizable">Determines whether the graphs are plotted with respect to layout.autosize:true and infer its container size.</param>
+    /// <param name="Responsive">Determines whether to change the layout size when window is resized. In v3, this option will be removed and will always be true.</param>
+    /// <param name="FillFrame">When `layout.autosize` is turned on, determines whether the grap fills the container (the default) or the screen (if set to *true*).</param>
+    /// <param name="FrameMargins">When `layout.autosize` is turned on, set the frame margins in fraction of the graph size.'</param>
+    /// <param name="ScrollZoom">Determines whether mouse wheel or two-finger scroll zooms is enable. Turned on by default for gl3d, geo and mapbox subplots (as these subplot types do not have zoombox via pan, but turned off by default for cartesian subplots. Set `scrollZoom` to *false* to disable scrolling for all subplots.</param>
+    /// <param name="DoubleClick">Sets the double click interaction mode. Has an effect only in cartesian plots. If *false*, double click is disable. If *reset*, double click resets the axis ranges to their initial values. If *autosize*, double click set the axis ranges to their autorange values. If *reset+autosize*, the odd double clicks resets the axis ranges to their initial values and even double clicks set the axis ranges to their autorange values.</param>
+    /// <param name="DoubleClickDelay">Sets the delay for registering a double-click in ms. This is the time interval (in ms) between first mousedown and 2nd mouseup to constitute a double-click. This setting propagates to all on-subplot double clicks (except for geo and mapbox) and on-legend double clicks.</param>
+    /// <param name="ShowAxisDragHandles">Set to *false* to omit cartesian axis pan/zoom drag handles.</param>
+    /// <param name="ShowAxisRangeEntryBoxes">Set to *false* to omit direct range entry at the pan/zoom drag points, note that `showAxisDragHandles` must be enabled to have an effect.</param>
+    /// <param name="ShowTips">Determines whether or not tips are shown while interacting with the resulting graphs.</param>
+    /// <param name="ShowLink">Determines whether a link to Chart Studio Cloud is displayed at the bottom right corner of resulting graphs. Use with `sendData` and `linkText`.</param>
+    /// <param name="LinkText">Sets the text appearing in the `showLink` link.</param>
+    /// <param name="SendData">If *showLink* is true, does it contain data just link to a Chart Studio Cloud file?</param>
+    /// <param name="ShowSources">Adds a source-displaying function to show sources on the resulting graphs.</param>
+    /// <param name="DisplayModeBar">Determines the mode bar display mode. If *true*, the mode bar is always visible. If *false*, the mode bar is always hidden. If *hover*, the mode bar is visible while the mouse cursor is on the graph container.</param>
+    /// <param name="ShowSendToCloud">Should we include a ModeBar button, labeled "Edit in Chart Studio that sends this chart to chart-studio.plotly.com (formerly plot.ly) or another plotly server as specified by `plotlyServerURL` for editing, export, etc? Prior to version 1.43.0 this button was included by default, now it is opt-in using this flag. Note that this button can (depending on `plotlyServerURL` being set) send your data to an external server. However that server does not persist your data until you arrive at the Chart Studio and explicitly click "Save".</param>
+    /// <param name="ShowEditInChartStudio">Same as `showSendToCloud`, but use a pencil icon instead of a floppy-disk. Note that if both `showSendToCloud` and `showEditInChartStudio` are turned only `showEditInChartStudio` will be honored.</param>
+    /// <param name="ModeBarButtonsToRemove">Remove mode bar buttons by name. See ./components/modebar/buttons.js for the list of names.</param>
+    /// <param name="ModeBarButtonsToAdd">Add mode bar button using config objects. See ./components/modebar/buttons.js for list of arguments. To enable predefined modebar buttons e.g. shape drawing, hover and spikelines simply provide their string name(s). This could include: *v1hovermode*, *hoverclosest*, *hovercompare*, *togglehover*, *togglespikelines*, *drawline*, *drawopenpath*, *drawclosedpath*, *drawcircle*, *drawrect* and *eraseshape*. Please note that these predefined buttons will only be shown if they are compatible with all trace types used in a graph.</param>
+    /// <param name="ModeBarButtons">Define fully custom mode bar buttons as nested array where the outer arrays represents button groups, and the inner arrays have buttons config objects or names of default buttons. See ./components/modebar/buttons.js for more info.'</param>
+    /// <param name="ToImageButtonOptions">Statically override options for toImage modebar button allowed keys are format, filename, width, height, scale', see ../components/modebar/buttons.js</param>
+    /// <param name="Displaylogo">Determines whether or not the plotly logo is displayed on the end of the mode bar.</param>
+    /// <param name="Watermark">watermark the images with the company\'s logo</param>
+    /// <param name="plotGlPixelRatio">Set the pixel ratio during WebGL image export. This config option was formerly named `plot3dPixelRatio` which is now deprecated.</param>
+    /// <param name="SetBackground">Set function to add the background color (i.e. `layout.paper_color`) to a different container. This function take the graph div as first argument and the current background color as second argument. Alternatively, set to string *opaque* to ensure there is white behind it.</param>
+    /// <param name="TopojsonURL">Set the URL to topojson used in geo charts. By default, the topojson files are fetched from cdn.plot.ly. For example, set this option to: &lt;path-to-plotly.js&gt;/dist/topojson to render geographical feature using the topojson files that ship with the plotly.js module.</param>
+    /// <param name="MapboxAccessToken">Mapbox access token (required to plot mapbox trace types). If using an Mapbox Atlas server, set this option to \'\' so that plotly.js won\'t attempt to authenticate to the public Mapbox server.</param>
+    /// <param name="Logging">Turn all console logging on or off (errors will be thrown). This should ONLY be set via Plotly.setPlotConfig Available levels: 0: no logs 1: warnings and errors, but not informational messages 2: verbose logs</param>
+    /// <param name="NotifyOnLogging">Turn all console logging on or off (errors will be thrown). This should ONLY be set via Plotly.setPlotConfig Available levels: 0: no logs 1: warnings and errors, but not informational messages 2: verbose logs</param>
+    /// <param name="QueueLength">Sets the length of the undo/redo queue.</param>
+    /// <param name="GlobalTransforms">Set global transform to be applied to all traces with no specification needed</param>
+    /// <param name="Locale">Which localization should we use? Should be a string like \'en\' or \'en-US\'.</param>
+    /// <param name="Locales">
+    /// Localization definitions
+    /// Locales can be provided either here (specific to one chart) or globally
+    /// by registering them as modules.
+    /// Should be an object of objects {locale: {dictionary: {...}, format: {...}}}'
+    /// {
+    ///   da: {
+    ///       dictionary: {\'Reset axes\': \'Nulstil aksler\', ...},
+    ///       format: {months: [...], shortMonths: [...]}',
+    ///   },
+    ///   ...
+    /// }
+    /// All parts are optional. When looking for translation or format fields, we
+    /// look first for an exact match in a config locale, then in a registered
+    /// module. If those fail, we strip off any regionalization (\'en-US\' -> \'en\')
+    /// and try each (config, registry) again. The final fallback for translation
+    /// is untranslated (which is US English) and for formats is the base English
+    /// (the only consequence being the last fallback date format %x is DD/MM/YYYY
+    /// instead of MM/DD/YYYY). Currently `grouping` and `currency` are ignored
+    /// for our automatic number formatting, but can be used in custom formats.
+    /// </param>
     [<CompiledName("WithConfigStyle")>]
     static member withConfigStyle
         (
             [<Optional; DefaultParameterValue(null)>] ?StaticPlot: bool,
+            [<Optional; DefaultParameterValue(null)>] ?TypesetMath: bool,
             [<Optional; DefaultParameterValue(null)>] ?PlotlyServerUrl: string,
-            [<Optional; DefaultParameterValue(null)>] ?Autosizable: bool,
             [<Optional; DefaultParameterValue(null)>] ?Editable: bool,
             [<Optional; DefaultParameterValue(null)>] ?Edits: Edits,
+            [<Optional; DefaultParameterValue(null)>] ?EditSelection: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Autosizable: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Responsive: bool,
+            [<Optional; DefaultParameterValue(null)>] ?FillFrame: bool,
+            [<Optional; DefaultParameterValue(null)>] ?FrameMargins: float,
+            [<Optional; DefaultParameterValue(null)>] ?ScrollZoom: StyleParam.ScrollZoom,
+            [<Optional; DefaultParameterValue(null)>] ?DoubleClick: StyleParam.DoubleClick,
+            [<Optional; DefaultParameterValue(null)>] ?DoubleClickDelay: int,
+            [<Optional; DefaultParameterValue(null)>] ?ShowAxisDragHandles: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowAxisRangeEntryBoxes: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowTips: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowLink: bool,
+            [<Optional; DefaultParameterValue(null)>] ?LinkText: string,
+            [<Optional; DefaultParameterValue(null)>] ?SendData: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ShowSources: obj,
+            [<Optional; DefaultParameterValue(null)>] ?DisplayModeBar: bool,
             [<Optional; DefaultParameterValue(null)>] ?ShowSendToCloud: bool,
             [<Optional; DefaultParameterValue(null)>] ?ShowEditInChartStudio: bool,
-            [<Optional; DefaultParameterValue(null)>] ?Responsive: bool,
+            [<Optional; DefaultParameterValue(null)>] ?ModeBarButtonsToRemove: seq<StyleParam.ModeBarButton>,
+            [<Optional; DefaultParameterValue(null)>] ?ModeBarButtonsToAdd: seq<StyleParam.ModeBarButton>,
+            [<Optional; DefaultParameterValue(null)>] ?ModeBarButtons: seq<seq<StyleParam.ModeBarButton>>,
             [<Optional; DefaultParameterValue(null)>] ?ToImageButtonOptions: ToImageButtonOptions,
-            [<Optional; DefaultParameterValue(null)>] ?ModeBarButtonsToAdd: seq<StyleParam.ModeBarButton>
+            [<Optional; DefaultParameterValue(null)>] ?Displaylogo: bool,
+            [<Optional; DefaultParameterValue(null)>] ?Watermark: bool,
+            [<Optional; DefaultParameterValue(null)>] ?plotGlPixelRatio: float,
+            [<Optional; DefaultParameterValue(null)>] ?SetBackground: obj,
+            [<Optional; DefaultParameterValue(null)>] ?TopojsonURL: string,
+            [<Optional; DefaultParameterValue(null)>] ?MapboxAccessToken: string,
+            [<Optional; DefaultParameterValue(null)>] ?Logging: int,
+            [<Optional; DefaultParameterValue(null)>] ?NotifyOnLogging: int,
+            [<Optional; DefaultParameterValue(null)>] ?QueueLength: int,
+            [<Optional; DefaultParameterValue(null)>] ?GlobalTransforms: obj,
+            [<Optional; DefaultParameterValue(null)>] ?Locale: string,
+            [<Optional; DefaultParameterValue(null)>] ?Locales: obj
         ) =
         (fun (ch: GenericChart) ->
 
             let config =
                 Config.init (
                     ?StaticPlot = StaticPlot,
+                    ?TypesetMath = TypesetMath,
                     ?PlotlyServerUrl = PlotlyServerUrl,
-                    ?Autosizable = Autosizable,
-                    ?Responsive = Responsive,
-                    ?ToImageButtonOptions = ToImageButtonOptions,
-                    ?ShowSendToCloud = ShowSendToCloud,
-                    ?ShowEditInChartStudio = ShowEditInChartStudio,
                     ?Editable = Editable,
                     ?Edits = Edits,
-                    ?ModeBarButtonsToAdd = ModeBarButtonsToAdd
+                    ?EditSelection = EditSelection,
+                    ?Autosizable = Autosizable,
+                    ?Responsive = Responsive,
+                    ?FillFrame = FillFrame,
+                    ?FrameMargins = FrameMargins,
+                    ?ScrollZoom = ScrollZoom,
+                    ?DoubleClick = DoubleClick,
+                    ?DoubleClickDelay = DoubleClickDelay,
+                    ?ShowAxisDragHandles = ShowAxisDragHandles,
+                    ?ShowAxisRangeEntryBoxes = ShowAxisRangeEntryBoxes,
+                    ?ShowTips = ShowTips,
+                    ?ShowLink = ShowLink,
+                    ?LinkText = LinkText,
+                    ?SendData = SendData,
+                    ?ShowSources = ShowSources,
+                    ?DisplayModeBar = DisplayModeBar,
+                    ?ShowSendToCloud = ShowSendToCloud,
+                    ?ShowEditInChartStudio = ShowEditInChartStudio,
+                    ?ModeBarButtonsToRemove = ModeBarButtonsToRemove,
+                    ?ModeBarButtonsToAdd = ModeBarButtonsToAdd,
+                    ?ModeBarButtons = ModeBarButtons,
+                    ?ToImageButtonOptions = ToImageButtonOptions,
+                    ?Displaylogo = Displaylogo,
+                    ?Watermark = Watermark,
+                    ?plotGlPixelRatio = plotGlPixelRatio,
+                    ?SetBackground = SetBackground,
+                    ?TopojsonURL = TopojsonURL,
+                    ?MapboxAccessToken = MapboxAccessToken,
+                    ?Logging = Logging,
+                    ?NotifyOnLogging = NotifyOnLogging,
+                    ?QueueLength = QueueLength,
+                    ?GlobalTransforms = GlobalTransforms,
+                    ?Locale = Locale,
+                    ?Locales = Locales
                 )
 
             ch |> Chart.withConfig config)
-
-
 
     //==============================================================================================================
     //================================= More complicated composite methods =========================================
@@ -2805,10 +3078,26 @@ type Chart =
 
 
     /// <summary>
-    /// Creates a subplot grid with the given dimensions (nRows x nCols) for the input charts.
+    /// Creates a subplot grid with the given dimensions (nRows x nCols) for the input charts. The default row order is from top to bottom.
+    ///
+    /// For each input chart, a corresponding subplot cell is created in the grid. The following limitations apply to the individual grid cells:
+    ///
+    /// - only one pair of 2D cartesian axes is allowed per cell. If there are multiple x or y axes on an input chart, the first one is used, and the rest is discarded (meaning, it is removed from the combined layout).
+    ///   if you need multiple axes per grid cell, create a custom grid by manually creating axes with custom domains instead.
+    ///   The new id of the axes corresponds to the number of the grid cell, e.g. the third grid cell will contain xaxis3 and yaxis3
+    ///
+    /// - For other subplot layouts (Cartesian3D, Polar, Ternary, Geo, Mapbox, Smith), the same rule applies: only one subplot per grid cell, the first one is used, the rest is discarded.
+    ///   The new id of the subplot layout corresponds to the number of the grid cell, e.g. the third grid cell will contain scene3 etc.
+    ///
+    /// - The Domain of traces that calculate their position by domain only (e.g. Pie traces) are replaced by a domain pointing to the new grid position.
+    ///
+    /// - If SubPlotTitles are provided, they are used as the titles of the individual cells in ascending order. If the number of titles is less than the number of subplots, the remaining subplots are left without a title.
     /// </summary>
     /// <param name ="nRows">The number of rows in the grid. If you provide a 2D `subplots` array or a `yaxes` array, its length is used as the default. But it's also possible to have a different length, if you want to leave a row at the end for non-cartesian subplots.</param>
     /// <param name ="nCols">The number of columns in the grid. If you provide a 2D `subplots` array, the length of its longest row is used as the default. If you give an `xaxes` array, its length is used as the default. But it's also possible to have a different length, if you want to leave a row at the end for non-cartesian subplots.</param>
+    /// <param name ="SubPlotTitles">A collection of titles for the individual subplots.</param>
+    /// <param name ="SubPlotTitleFont">The font of the subplot titles</param>
+    /// <param name ="SubPlotTitleOffset">A vertical offset applied to each subplot title, moving it upwards if positive and vice versa</param>
     /// <param name ="SubPlots">Used for freeform grids, where some axes may be shared across subplots but others are not. Each entry should be a cartesian subplot id, like "xy" or "x3y2", or "" to leave that cell empty. You may reuse x axes within the same column, and y axes within the same row. Non-cartesian subplots and traces that support `domain` can place themselves in this grid separately using the `gridcell` attribute.</param>
     /// <param name ="XAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an y axis id like "y", "y2", etc., or "" to not put a y axis in that row. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `xaxes` is present, will generate consecutive IDs.</param>
     /// <param name ="YAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an x axis id like "x", "x2", etc., or "" to not put an x axis in that column. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `yaxes` is present, will generate consecutive IDs.</param>
@@ -2824,9 +3113,12 @@ type Chart =
         (
             nRows: int,
             nCols: int,
-            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId) [] [],
-            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId [],
-            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId [],
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitles: #seq<string>,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleFont: Font,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleOffset: float,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId)[][],
+            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId[],
+            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId[],
             [<Optional; DefaultParameterValue(null)>] ?RowOrder: StyleParam.LayoutGridRowOrder,
             [<Optional; DefaultParameterValue(null)>] ?Pattern: StyleParam.LayoutGridPattern,
             [<Optional; DefaultParameterValue(null)>] ?XGap: float,
@@ -2835,13 +3127,77 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?XSide: StyleParam.LayoutGridXSide,
             [<Optional; DefaultParameterValue(null)>] ?YSide: StyleParam.LayoutGridYSide
         ) =
-        fun (gCharts: #seq<GenericChart.GenericChart>) ->
+        fun (gCharts: #seq<GenericChart>) ->
+
+            // calculates the grid cell dimensions (in fractions of paper size), that is, the start and end points of each cell in a row or column
+            let getGridCellDimensions (gridDimensionStart: float) (gridDimensionEnd: float) (gap: float) (length: int) (reversed: bool) =
+                // adapted from grid cell layout logic directly in plotly.js source code: https://github.com/plotly/plotly.js/blob/5d6d45758f485ca309691bc7f33e799ef80f2cd5/src/components/grid/index.js#L224-L238
+    
+                let step = (gridDimensionEnd - gridDimensionStart) / (float length - gap)
+                let cellDomain = step * (1. - gap)
+
+                Array.init length (fun i -> 
+                    let cellStart = gridDimensionStart + (step * float i)
+                    (cellStart, cellStart + cellDomain)
+                )
+                |> fun p -> if reversed then p else Array.rev p
+
+            // calculates the positions of the subplot titles
+            // titles are placed in the middle of the top edge of each cell in a layout grid as annotations with paper copordinates.
+            let calculateSubplotTitlePositions (gridDimensionStart: float) (gridDimensionEnd: float) (xgap: float) (ygap: float) (nrows: int) (ncols: int) (reversed:bool) =
+    
+                let subPlotTitleOffset = defaultArg SubPlotTitleOffset 0.
+
+                let xDomains = getGridCellDimensions gridDimensionStart gridDimensionEnd xgap ncols true
+                let yDomains = getGridCellDimensions gridDimensionStart gridDimensionEnd ygap nrows reversed
+
+                Array.init nrows (fun r -> 
+                    Array.init ncols (fun c -> 
+                        let xStart = fst xDomains.[c]
+                        let xEnd = snd xDomains.[c]
+                        let yEnd = snd yDomains.[r]
+                        (r,c), ((xStart + xEnd) / 2., yEnd + subPlotTitleOffset)
+                    )
+                )
+                |> Array.concat
 
             let pattern =
                 defaultArg Pattern StyleParam.LayoutGridPattern.Independent
 
+            let rowOrder = defaultArg RowOrder StyleParam.LayoutGridRowOrder.TopToBottom
+
+            let xGap = defaultArg XGap (if pattern = StyleParam.LayoutGridPattern.Coupled then 0.1 else 0.2)
+            let yGap = defaultArg YGap (if pattern = StyleParam.LayoutGridPattern.Coupled then 0.1 else 0.3)
+
+
             let hasSharedAxes =
                 pattern = StyleParam.LayoutGridPattern.Coupled
+
+            let subPlotTitleAnnotations =
+                match SubPlotTitles with
+                | Some titles ->
+
+                    let reversed = rowOrder = StyleParam.LayoutGridRowOrder.BottomToTop
+
+                    let positions =
+                        calculateSubplotTitlePositions 0. 1. xGap yGap nRows nCols reversed
+
+                    titles
+                    |> Seq.zip positions[0 .. (Seq.length titles) - 1]
+                    |> Seq.map (fun (((rowIndex, colIndex), (x, y)), title) ->
+                        Annotation.init(
+                            X = x,
+                            XRef = "paper",
+                            XAnchor = StyleParam.XAnchorPosition.Center,
+                            Y = y,
+                            YRef = "paper",
+                            YAnchor = StyleParam.YAnchorPosition.Bottom,
+                            Text = title,
+                            ShowArrow = false,
+                            ?Font = SubPlotTitleFont
+                        )
+                    )
+                | None -> [||]
 
             // rows x cols coordinate grid
             let gridCoordinates =
@@ -2868,6 +3224,13 @@ type Chart =
                     let yAxis =
                         layout.TryGetTypedValue<LinearAxis> "yaxis" |> Option.defaultValue (LinearAxis.init ())
 
+                    let allXAxes = Layout.getXAxes layout |> Seq.map fst
+                    let allYAxes = Layout.getYAxes layout |> Seq.map fst
+
+                    // remove all axes from layout. Only cartesian axis in each dimension is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allXAxes |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+                    allYAxes |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+
                     let xAnchor, yAnchor =
                         if hasSharedAxes then
                             colIndex, rowIndex //set axis anchors according to grid coordinates
@@ -2876,21 +3239,20 @@ type Chart =
 
                     gChart
                     |> Chart.withAxisAnchor (xAnchor, yAnchor) // set adapted axis anchors
-                    |> Chart.withXAxis (xAxis, (StyleParam.SubPlotId.XAxis(i + 1))) // set previous axis with adapted id (one individual axis for each subplot, wether or not they will be used later)
-                    |> Chart.withYAxis (yAxis, (StyleParam.SubPlotId.YAxis(i + 1))) // set previous axis with adapted id (one individual axis for each subplot, wether or not they will be used later)
-                    |> GenericChart.mapLayout (fun l ->
-                        if i > 0 then
-                            // remove default axes from consecutive charts, otherwise they will override the first one
-                            l.Remove("xaxis") |> ignore
-                            l.Remove("yaxis") |> ignore
+                    |> Chart.withXAxis (xAxis, (StyleParam.SubPlotId.XAxis(i + 1))) // set previous axis with adapted id (one individual axis for each subplot, whether or not they will be used later)
+                    |> Chart.withYAxis (yAxis, (StyleParam.SubPlotId.YAxis(i + 1))) // set previous axis with adapted id (one individual axis for each subplot, whether or not they will be used later)
 
-                        l)
                 | TraceID.Cartesian3D ->
 
                     let scene =
                         layout.TryGetTypedValue<Scene> "scene"
                         |> Option.defaultValue (Scene.init ())
                         |> Scene.style (Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1))
+
+                    let allScenes = Layout.getScenes layout |> Seq.map fst
+
+                    // remove all scenes from layout. Only one scene is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allScenes |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
 
                     let sceneAnchor =
                         StyleParam.SubPlotId.Scene(i + 1)
@@ -2905,11 +3267,17 @@ type Chart =
                         |> Option.defaultValue (Polar.init ())
                         |> Polar.style (Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1))
 
+                    let allPolars = Layout.getPolars layout |> Seq.map fst
+
+                    // remove all polar subplots from layout. Only one polar subplot is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allPolars |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+
                     let polarAnchor =
                         StyleParam.SubPlotId.Polar(i + 1)
 
                     gChart
-                    |> GenericChart.mapTrace (fun t -> t :?> TracePolar |> TracePolarStyle.SetPolar polarAnchor :> Trace)
+                    |> GenericChart.mapTrace (fun t ->
+                        t :?> TracePolar |> TracePolarStyle.SetPolar polarAnchor :> Trace)
                     |> Chart.withPolar (polar, (i + 1))
 
                 | TraceID.Smith ->
@@ -2918,12 +3286,18 @@ type Chart =
                         layout.TryGetTypedValue<Smith> "smith"
                         |> Option.defaultValue (Smith.init ())
                         |> Smith.style (Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1))
+                    
+                    let allSmiths = Layout.getSmiths layout |> Seq.map fst
+
+                    // remove all smith subplots from layout. Only one smith subplot is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allSmiths |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
 
                     let polarAnchor =
                         StyleParam.SubPlotId.Smith(i + 1)
 
                     gChart
-                    |> GenericChart.mapTrace (fun t -> t :?> TraceSmith |> TraceSmithStyle.SetSmith polarAnchor :> Trace)
+                    |> GenericChart.mapTrace (fun t ->
+                        t :?> TraceSmith |> TraceSmithStyle.SetSmith polarAnchor :> Trace)
                     |> Chart.withSmith (smith, (i + 1))
 
                 | TraceID.Geo ->
@@ -2932,17 +3306,33 @@ type Chart =
                         |> Option.defaultValue (Geo.init ())
                         |> Geo.style (Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1))
 
+                    let allGeos = Layout.getGeos layout |> Seq.map fst
+
+                    // remove all geo subplots from layout. Only one geo subplot is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allGeos |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+
                     let geoAnchor =
                         StyleParam.SubPlotId.Geo(i + 1)
 
                     gChart
                     |> GenericChart.mapTrace (fun t -> t :?> TraceGeo |> TraceGeoStyle.SetGeo geoAnchor :> Trace)
                     |> Chart.withGeo (geo, (i + 1))
+
                 | TraceID.Mapbox ->
                     let mapbox =
                         layout.TryGetTypedValue<Mapbox> "mapbox"
                         |> Option.defaultValue (Mapbox.init ())
-                        |> Mapbox.style (Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1))
+                        |> Mapbox.style (
+                            Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1)
+                        )
+
+                    let allMapboxes = Layout.getMapboxes layout |> Seq.map fst
+
+                    // remove all mapbox subplots from layout. Only one mapbox subplot is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allMapboxes |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+
+                    let geoAnchor =
+                        StyleParam.SubPlotId.Geo(i + 1)
 
                     let mapboxAnchor =
                         StyleParam.SubPlotId.Mapbox(i + 1)
@@ -2951,13 +3341,6 @@ type Chart =
                     |> GenericChart.mapTrace (fun t ->
                         t :?> TraceMapbox |> TraceMapboxStyle.SetMapbox mapboxAnchor :> Trace)
                     |> Chart.withMapbox (mapbox, (i + 1))
-                | TraceID.Domain ->
-                    let newDomain =
-                        LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1)
-
-                    gChart
-                    |> GenericChart.mapTrace (fun t ->
-                        t :?> TraceDomain |> TraceDomainStyle.SetDomain newDomain :> Trace)
 
                 | TraceID.Ternary ->
 
@@ -2968,23 +3351,40 @@ type Chart =
                             Domain = LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1)
                         )
 
+                    let allTernaries = Layout.getTernaries layout |> Seq.map fst
+
+                    // remove all ternary subplots from layout. Only one ternary subplot is supported per grid cell, and leaving anything else on this layout may lead to property name clashes on combine.
+                    allTernaries |> Seq.iter (fun propName -> layout.Remove(propName) |> ignore)
+
                     let ternaryAnchor =
                         StyleParam.SubPlotId.Ternary(i + 1)
 
                     gChart
                     |> GenericChart.mapTrace (fun t ->
                         t :?> TraceTernary |> TraceTernaryStyle.SetTernary ternaryAnchor :> Trace)
-                    |> Chart.withTernary (ternary, (i + 1)))
+                    |> Chart.withTernary (ternary, (i + 1))
+
+                | TraceID.Domain ->
+
+                    // no need to remove existing domains, as only one domain can exist on the original layout. Just replace it.
+                    let newDomain =
+                        LayoutObjects.Domain.init (Row = rowIndex - 1, Column = colIndex - 1)
+
+                    gChart
+                    |> GenericChart.mapTrace (fun t ->
+                        t :?> TraceDomain |> TraceDomainStyle.SetDomain newDomain :> Trace)
+            )
             |> Chart.combine
+            |> Chart.withAnnotations(subPlotTitleAnnotations, Append=true)
             |> Chart.withLayoutGrid (
                 LayoutGrid.init (
                     Rows = nRows,
                     Columns = nCols,
                     Pattern = pattern,
+                    RowOrder = rowOrder,
                     ?SubPlots = SubPlots,
                     ?XAxes = XAxes,
                     ?YAxes = YAxes,
-                    ?RowOrder = RowOrder,
                     ?XGap = XGap,
                     ?YGap = YGap,
                     ?Domain = Domain,
@@ -2999,7 +3399,23 @@ type Chart =
     /// ATTENTION: when the individual rows do not have the same amount of charts, they will be filled with dummy charts TO THE RIGHT.
     ///
     /// prevent this behaviour by using Chart.Invisible at the cells that should be empty.
+    ///
+    /// For each input chart, a corresponding subplot cell is created in the grid. The following limitations apply to the individual grid cells:
+    ///
+    /// - only one pair of 2D cartesian axes is allowed per cell. If there are multiple x or y axes on an input chart, the first one is used, and the rest is discarded (meaning, it is removed from the combined layout).
+    ///   if you need multiple axes per grid cell, create a custom grid by manually creating axes with custom domains instead.
+    ///   The new id of the axes corresponds to the number of the grid cell, e.g. the third grid cell will contain xaxis3 and yaxis3
+    ///
+    /// - For other subplot layouts (Cartesian3D, Polar, Ternary, Geo, Mapbox, Smith), the same rule applies: only one subplot per grid cell, the first one is used, the rest is discarded.
+    ///   The new id of the subplot layout corresponds to the number of the grid cell, e.g. the third grid cell will contain scene3 etc.
+    ///
+    /// - The Domain of traces that calculate their position by domain only (e.g. Pie traces) are replaced by a domain pointing to the new grid position.
+    ///
+    /// - If SubPlotTitles are provided, they are used as the titles of the individual cells in ascending order. If the number of titles is less than the number of subplots, the remaining subplots are left without a title.
     /// </summary>
+    /// <param name ="SubPlotTitles">A collection of titles for the individual subplots.</param>
+    /// <param name ="SubPlotTitleFont">The font of the subplot titles</param>
+    /// <param name ="SubPlotTitleOffset">A vertical offset applied to each subplot title, moving it upwards if positive and vice versa</param>
     /// <param name ="SubPlots">Used for freeform grids, where some axes may be shared across subplots but others are not. Each entry should be a cartesian subplot id, like "xy" or "x3y2", or "" to leave that cell empty. You may reuse x axes within the same column, and y axes within the same row. Non-cartesian subplots and traces that support `domain` can place themselves in this grid separately using the `gridcell` attribute.</param>
     /// <param name ="XAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an y axis id like "y", "y2", etc., or "" to not put a y axis in that row. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `xaxes` is present, will generate consecutive IDs.</param>
     /// <param name ="YAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an x axis id like "x", "x2", etc., or "" to not put an x axis in that column. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `yaxes` is present, will generate consecutive IDs.</param>
@@ -3013,9 +3429,12 @@ type Chart =
     [<CompiledName("Grid")>]
     static member Grid
         (
-            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId) [] [],
-            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId [],
-            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId [],
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitles: #seq<string>,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleFont: Font,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleOffset: float,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId)[][],
+            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId[],
+            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId[],
             [<Optional; DefaultParameterValue(null)>] ?RowOrder: StyleParam.LayoutGridRowOrder,
             [<Optional; DefaultParameterValue(null)>] ?Pattern: StyleParam.LayoutGridPattern,
             [<Optional; DefaultParameterValue(null)>] ?XGap: float,
@@ -3039,7 +3458,7 @@ type Chart =
                     "To have more positional control, use Chart.Empty() in your Grid where you want to have empty cells."
 
                 let copy =
-                    gCharts |> Seq.map Seq.cast<GenericChart.GenericChart> // this is ugly but i did not find another way for the inner seq to be be a flexible type (so you can use list, array, and seq).
+                    gCharts |> Seq.map Seq.cast<GenericChart> // this is ugly but i did not find another way for the inner seq to be be a flexible type (so you can use list, array, and seq).
 
                 let newGrid =
                     copy
@@ -3061,6 +3480,9 @@ type Chart =
                 |> Chart.Grid(
                     nRows,
                     nCols,
+                    ?SubPlotTitles = SubPlotTitles,
+                    ?SubPlotTitleFont = SubPlotTitleFont,
+                    ?SubPlotTitleOffset = SubPlotTitleOffset,
                     ?SubPlots = SubPlots,
                     ?XAxes = XAxes,
                     ?YAxes = YAxes,
@@ -3078,6 +3500,9 @@ type Chart =
                 |> Chart.Grid(
                     nRows,
                     nCols,
+                    ?SubPlotTitles = SubPlotTitles,
+                    ?SubPlotTitleFont = SubPlotTitleFont,
+                    ?SubPlotTitleOffset = SubPlotTitleOffset,
                     ?SubPlots = SubPlots,
                     ?XAxes = XAxes,
                     ?YAxes = YAxes,
@@ -3091,7 +3516,23 @@ type Chart =
                 )
 
     /// Creates a chart stack (a subplot grid with one column) from the input charts.
+    ///
+    /// For each input chart, a corresponding subplot cell is created in the column. The following limitations apply to the individual grid cells:
+    ///
+    /// - only one pair of 2D cartesian axes is allowed per cell. If there are multiple x or y axes on an input chart, the first one is used, and the rest is discarded (meaning, it is removed from the combined layout).
+    ///   if you need multiple axes per grid cell, create a custom grid by manually creating axes with custom domains instead.
+    ///   The new id of the axes corresponds to the number of the grid cell, e.g. the third grid cell will contain xaxis3 and yaxis3
+    ///
+    /// - For other subplot layouts (Cartesian3D, Polar, Ternary, Geo, Mapbox, Smith), the same rule applies: only one subplot per grid cell, the first one is used, the rest is discarded.
+    ///   The new id of the subplot layout corresponds to the number of the grid cell, e.g. the third grid cell will contain scene3 etc.
+    ///
+    /// - The Domain of traces that calculate their position by domain only (e.g. Pie traces) are replaced by a domain pointing to the new grid position.
+    ///
+    /// - If SubPlotTitles are provided, they are used as the titles of the individual cells in ascending order. If the number of titles is less than the number of subplots, the remaining subplots are left without a title.
     /// </summary>
+    /// <param name ="SubPlotTitles">A collection of titles for the individual subplots.</param>
+    /// <param name ="SubPlotTitleFont">The font of the subplot titles</param>
+    /// <param name ="SubPlotTitleOffset">A vertical offset applied to each subplot title, moving it upwards if positive and vice versa</param>
     /// <param name ="SubPlots">Used for freeform grids, where some axes may be shared across subplots but others are not. Each entry should be a cartesian subplot id, like "xy" or "x3y2", or "" to leave that cell empty. You may reuse x axes within the same column, and y axes within the same row. Non-cartesian subplots and traces that support `domain` can place themselves in this grid separately using the `gridcell` attribute.</param>
     /// <param name ="XAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an y axis id like "y", "y2", etc., or "" to not put a y axis in that row. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `xaxes` is present, will generate consecutive IDs.</param>
     /// <param name ="YAxes">Used with `yaxes` when the x and y axes are shared across columns and rows. Each entry should be an x axis id like "x", "x2", etc., or "" to not put an x axis in that column. Entries other than "" must be unique. Ignored if `subplots` is present. If missing but `yaxes` is present, will generate consecutive IDs.</param>
@@ -3105,9 +3546,12 @@ type Chart =
     [<CompiledName("SingleStack")>]
     static member SingleStack
         (
-            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId) [] [],
-            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId [],
-            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId [],
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitles: #seq<string>,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleFont: Font,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlotTitleOffset: float,
+            [<Optional; DefaultParameterValue(null)>] ?SubPlots: (StyleParam.LinearAxisId * StyleParam.LinearAxisId)[][],
+            [<Optional; DefaultParameterValue(null)>] ?XAxes: StyleParam.LinearAxisId[],
+            [<Optional; DefaultParameterValue(null)>] ?YAxes: StyleParam.LinearAxisId[],
             [<Optional; DefaultParameterValue(null)>] ?RowOrder: StyleParam.LayoutGridRowOrder,
             [<Optional; DefaultParameterValue(null)>] ?Pattern: StyleParam.LayoutGridPattern,
             [<Optional; DefaultParameterValue(null)>] ?XGap: float,
@@ -3117,12 +3561,15 @@ type Chart =
             [<Optional; DefaultParameterValue(null)>] ?YSide: StyleParam.LayoutGridYSide
         ) =
 
-        fun (gCharts: #seq<GenericChart.GenericChart>) ->
+        fun (gCharts: #seq<GenericChart>) ->
 
             gCharts
             |> Chart.Grid(
                 nRows = Seq.length gCharts,
                 nCols = 1,
+                ?SubPlotTitles = SubPlotTitles,
+                ?SubPlotTitleFont = SubPlotTitleFont,
+                ?SubPlotTitleOffset = SubPlotTitleOffset,
                 ?SubPlots = SubPlots,
                 ?XAxes = XAxes,
                 ?YAxes = YAxes,
@@ -3135,55 +3582,6 @@ type Chart =
                 ?YSide = YSide
             )
 
-    // ############################################################
-// ####################### Apply to DisplayOptions
-
-    /// Show chart in browser
-    [<CompiledName("WithDescription")>]
-    static member withDescription (description: ChartDescription) (ch: GenericChart) =
-        ch |> mapDisplayOptions (DisplayOptions.style (Description = description))
-
-
-    /// Adds the given additional html tags on the chart's DisplayOptions. They will be included in the document's <head>
-    [<CompiledName("WithAdditionalHeadTags")>]
-    static member withAdditionalHeadTags (additionalHeadTags: seq<string>) (ch: GenericChart) =
-        ch
-        |> mapDisplayOptions (fun d ->
-            let tags =
-                d.TryGetTypedValue<seq<string>>("AdditionalHeadTags")
-
-            let newTags =
-                tags
-                |> Option.map (fun tags ->
-                    seq {
-                        yield! tags
-                        yield! additionalHeadTags
-                    })
-                |> Option.defaultValue additionalHeadTags
-
-            d |> DisplayOptions.style (AdditionalHeadTags = newTags))
-
-    /// Sets the given additional head tags on the chart's DisplayOptions. They will be included in the document's <head>
-    [<CompiledName("WithHeadTags")>]
-    static member withHeadTags (headTags: seq<string>) (ch: GenericChart) =
-        ch |> mapDisplayOptions (DisplayOptions.style (AdditionalHeadTags = headTags))
-
-
-    /// Adds the necessary script tags to render tex strings to the chart's DisplayOptions
-    [<CompiledName("WithMathTex")>]
-    static member withMathTex([<Optional; DefaultParameterValue(true)>] ?AppendTags: bool) =
-        let tags =
-            [
-                """<script type="text/x-mathjax-config;executed=true">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']], processEscapes: true}});</script>"""
-                """<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML%2CSafe.js&ver=4.1"></script>"""
-            ]
-
-        (fun (ch: GenericChart) ->
-
-            if (AppendTags |> Option.defaultValue true) then
-                ch |> Chart.withAdditionalHeadTags tags
-            else
-                ch |> Chart.withHeadTags tags)
 
     /// Sets the color axis with the given id on the chart layout
     [<CompiledName("WithColorAxis")>]
@@ -3269,3 +3667,93 @@ type Chart =
 
     [<CompiledName("WithSlider")>]
     static member withSlider(slider: Slider) = Chart.withSliders ([ slider ])
+
+
+    // ############################################################
+    // ####################### Apply to DisplayOptions
+
+    // <summary>
+    /// Sets the given DisplayOptions on the input chart.
+    ///
+    /// If there is already an DisplayOptions set, the object is replaced.
+    /// </summary>
+    [<CompiledName("SetDisplayOptions")>]
+    static member setDisplayOptions(displayOpts: DisplayOptions) =
+        (fun (ch: GenericChart) -> GenericChart.setDisplayOptions displayOpts ch)
+
+    /// <summary>
+    /// Sets the given DisplayOptions on the input chart.
+    ///
+    /// If there is already an DisplayOptions set, the objects are combined.
+    /// </summary>
+    [<CompiledName("WithDisplayOptions")>]
+    static member withDisplayOptions(displayOpts: DisplayOptions) =
+        (fun (ch: GenericChart) -> GenericChart.addDisplayOptions displayOpts ch)
+
+    /// <summary>
+    /// Applies the given styles to the chart's DisplayOptions object. Overwrites attributes with the same name that are already set.
+    /// </summary>
+    /// <param name="AdditionalHeadTags">Additional tags that will be included in the document's head </param>
+    /// <param name="Description">HTML tags that appear below the chart in HTML docs</param>
+    /// <param name="PlotlyJSReference">Sets how plotly is referenced in the head of html docs. When CDN, a script tag that references the plotly.js CDN is included in the output. When Full, a script tag containing the plotly.js source code (~3MB) is included in the output. HTML files generated with this option are fully self-contained and can be used offline</param>
+    [<CompiledName("WithDisplayOptionsStyle")>]
+    static member withDisplayOptionsStyle
+        (
+            [<Optional; DefaultParameterValue(null)>] ?AdditionalHeadTags: XmlNode list,
+            [<Optional; DefaultParameterValue(null)>] ?ChartDescription: XmlNode list,
+            [<Optional; DefaultParameterValue(null)>] ?PlotlyJSReference: PlotlyJSReference
+        ) =
+        (fun (ch: GenericChart) ->
+
+            let displayOpts' =
+                DisplayOptions.init (
+                    ?AdditionalHeadTags = AdditionalHeadTags,
+                    ?ChartDescription = ChartDescription,
+                    ?PlotlyJSReference = PlotlyJSReference
+                )
+
+            GenericChart.addDisplayOptions displayOpts' ch)
+
+
+    /// <summary>
+    /// Adds the given chart deycription the to chart's DisplayOptions. They will be included in the document's head
+    /// </summary>
+    /// <param name="chartDescription">The chart description to add to the given chart's DisplayOptions object</param>
+    /// <param name="ch">The chart to add a description to</param>
+    [<CompiledName("WithDescription")>]
+    static member withDescription (chartDescription: XmlNode list) (ch: GenericChart) =
+        ch |> GenericChart.mapDisplayOptions (DisplayOptions.addChartDescription chartDescription)
+
+    /// Adds the given additional html tags on the chart's DisplayOptions. They will be included in the document's head
+    [<CompiledName("WithAdditionalHeadTags")>]
+    static member withAdditionalHeadTags (additionalHeadTags: XmlNode list) (ch: GenericChart) =
+        ch |> GenericChart.mapDisplayOptions (DisplayOptions.addAdditionalHeadTags additionalHeadTags)
+
+    /// Sets the given additional head tags on the chart's DisplayOptions. They will be included in the document's head
+    [<CompiledName("WithHeadTags")>]
+    static member withHeadTags (additionalHeadTags: XmlNode list) (ch: GenericChart) =
+        ch |> GenericChart.mapDisplayOptions (DisplayOptions.setAdditionalHeadTags additionalHeadTags)
+
+
+    /// Adds the necessary script tags to render tex strings to the chart's DisplayOptions
+    [<CompiledName("WithMathTex")>]
+    static member withMathTex
+        (
+            [<Optional; DefaultParameterValue(true)>] ?AppendTags: bool,
+            [<Optional; DefaultParameterValue(3)>] ?MathJaxVersion: int
+        ) =
+        let version =
+            MathJaxVersion |> Option.defaultValue 3
+
+        let tags =
+            if version = 2 then
+                Globals.MATHJAX_V2_TAGS
+            else
+                Globals.MATHJAX_V3_TAGS
+
+        (fun (ch: GenericChart) ->
+
+            if (AppendTags |> Option.defaultValue true) then
+                ch |> Chart.withAdditionalHeadTags tags |> Chart.withConfigStyle (TypesetMath = true)
+            else
+                ch |> Chart.withHeadTags tags |> Chart.withConfigStyle (TypesetMath = true))
