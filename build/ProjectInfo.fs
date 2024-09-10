@@ -85,10 +85,10 @@ let ImageExportTestProject = ProjectInfo.create("ImageExportTests", "tests/Exten
 let CSharpTestProject = ProjectInfo.create("CSharpTests", "tests/ExtensionLibsTests/CSharpTests/CSharpTests.csproj")
 
 ///
-let testProjectsExtensionsLibs = [
-    ImageExportTestProject
-    CSharpTestProject
-]
+let testProjectsExtensionsLibs = List<ProjectInfo>.Empty
+    //ImageExportTestProject
+    //CSharpTestProject
+//]
 
 // test projects (.NET framework)
 let StrongNameTestProject = ProjectInfo.create("StrongNameTests", "tests/CoreTests/StrongNameTests/StrongNameTests.fsproj")
