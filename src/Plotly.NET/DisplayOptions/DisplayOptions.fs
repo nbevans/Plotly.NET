@@ -80,7 +80,7 @@ type DisplayOptions() =
     static member initCDNOnly() =
         DisplayOptions()
         |> DisplayOptions.style (
-            PlotlyJSReference = CDN $"https://cdn.plot.ly/plotly-{Globals.PLOTLYJS_VERSION}.min.js"
+            PlotlyJSReference = CDN ("https://cdn.plot.ly/plotly-" + Globals.PLOTLYJS_VERSION + ".min.js")
         )
 
     /// <summary>

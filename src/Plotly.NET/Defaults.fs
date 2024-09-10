@@ -34,9 +34,9 @@ module Defaults =
                     _id "favicon"
                     _rel "shortcut icon"
                     _type "image/png"
-                    _href $"data:image/png;base64,{Globals.LOGO_BASE64}"
+                    _href ("data:image/png;base64," + Globals.LOGO_BASE64)
                 ]),
-            PlotlyJSReference = CDN $"https://cdn.plot.ly/plotly-{Globals.PLOTLYJS_VERSION}.min.js"
+            PlotlyJSReference = CDN ("https://cdn.plot.ly/plotly-" + Globals.PLOTLYJS_VERSION + ".min.js")
         )
 
     /// The default chart template. Default: ChartTemplates.plotly

@@ -1126,7 +1126,7 @@ module StyleParam =
             | DashDot -> "dashdot"
             | LongDash -> "longdash"
             | LongDashDot -> "longdashdot"
-            | User px -> px |> Seq.map (fun px -> $"{px}px") |> String.concat ","
+            | User px -> px |> Seq.map (fun px -> string px + "px") |> String.concat ","
 
         static member convert = DrawingStyle.toString >> box
         override this.ToString() = this |> DrawingStyle.toString

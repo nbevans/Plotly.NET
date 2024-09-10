@@ -1107,7 +1107,7 @@ type Layout() =
                 layout
             | _ ->
                 failwith
-                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a legend on layout")
+                    (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a legend on layout"))
 
     /// <summary>
     /// Returns the Legend object of the layout with the given id.
@@ -1133,4 +1133,4 @@ type Layout() =
 
             | _ ->
                 failwith
-                    $"{StyleParam.SubPlotId.toString id} is an invalid subplot id for setting a Legend on layout")
+                    (StyleParam.SubPlotId.toString id + " is an invalid subplot id for setting a Legend on layout"))
